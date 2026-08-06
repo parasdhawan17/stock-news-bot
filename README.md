@@ -45,17 +45,31 @@ In your repo: **Settings → Secrets and variables → Actions → New repositor
 | `WHATSAPP_PHONE` | Your number with country code, e.g. `+919876543210` |
 | `CALLMEBOT_API_KEY` | API key from CallMeBot |
 
-### 4. Push to GitHub
+### 4. Push to GitHub and configure secrets
 
-Use a **public** repo for unlimited free GitHub Actions minutes:
+Use a **public** repo for unlimited free GitHub Actions minutes.
+
+**Option A — automated (recommended):**
 
 ```bash
 cd /Users/anisharajput/Documents/Github/stock-news-bot
-git init
-git add .
-git commit -m "Initial stock news bot"
-gh repo create stock-news-bot --public --source=. --push
+export FINNHUB_API_KEY="your-finnhub-key"
+export WHATSAPP_PHONE="+91xxxxxxxxxx"
+export CALLMEBOT_API_KEY="your-callmebot-key"
+./scripts/bootstrap.sh
 ```
+
+This script pushes to GitHub, sets all secrets, and triggers a test workflow run.
+
+**Option B — manual:**
+
+```bash
+cd /Users/anisharajput/Documents/Github/stock-news-bot
+git push -u origin main   # after creating the repo on GitHub
+./scripts/configure_secrets.sh
+```
+
+Or add secrets in the GitHub UI: **Settings → Secrets and variables → Actions**.
 
 ### 5. Test
 
@@ -77,11 +91,11 @@ US symbols use plain tickers. Keep the list to ~10 tickers to stay within messag
 
 ## Local testing
 
+Copy `.env.example` to `.env` and fill in your keys, then:
+
 ```bash
 pip install -r requirements.txt
-export FINNHUB_API_KEY="your-key"
-export WHATSAPP_PHONE="+91xxxxxxxxxx"
-export CALLMEBOT_API_KEY="your-callmebot-key"
+set -a && source .env && set +a
 python scripts/send_stock_news.py
 ```
 

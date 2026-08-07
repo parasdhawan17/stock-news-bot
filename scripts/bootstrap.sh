@@ -10,6 +10,9 @@
 #   export FINNHUB_API_KEY="your-finnhub-key"
 #   export WHATSAPP_PHONE="+91xxxxxxxxxx"
 #   export CALLMEBOT_API_KEY="your-callmebot-key"
+#   export BREVO_API_KEY="your-brevo-api-key"
+#   export EMAIL_TO="you@example.com"
+#   export EMAIL_FROM="digest@yourdomain.com"
 #   ./scripts/bootstrap.sh
 
 set -euo pipefail

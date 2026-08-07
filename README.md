@@ -1,15 +1,16 @@
 # Stock News Bot
 
-Daily US stock news digest delivered to WhatsApp via GitHub Actions.
+Daily US stock news digest delivered to WhatsApp and email via GitHub Actions.
 
-**Cost: $0** — Finnhub free API, CallMeBot free WhatsApp delivery, GitHub Actions on a public repo.
+**Cost: $0** — Finnhub free API, CallMeBot free WhatsApp delivery, Brevo free email tier, GitHub Actions on a public repo.
 
 ## How it works
 
-1. GitHub Actions runs daily at 8:00 AM IST (or manually via **Run workflow**).
+1. GitHub Actions runs twice daily (9:00 AM and 8:30 PM IST) or manually via **Run workflow**.
 2. The script reads tickers from `config/tickers.json`.
-3. Finnhub company-news API fetches the last 24 hours of headlines per ticker.
+3. Finnhub fetches the last 24 hours of headlines and real-time quotes per ticker.
 4. A formatted message is sent to your WhatsApp via CallMeBot.
+5. A rich HTML email digest (with thumbnails, summaries, and price changes) is sent via Brevo.
 
 ## Project structure
 
@@ -18,6 +19,7 @@ stock-news-bot/
 ├── .github/workflows/daily-stock-news.yml
 ├── config/tickers.json
 ├── scripts/send_stock_news.py
+├── templates/email_digest.html
 ├── requirements.txt
 └── README.md
 ```
@@ -35,7 +37,13 @@ stock-news-bot/
 2. Send it: `I allow callmebot to send me messages`
 3. It replies with your personal API key — save this for the next step.
 
-### 3. GitHub Secrets
+### 3. Brevo email setup
+
+1. Sign up at [brevo.com](https://www.brevo.com/) (free tier: 300 emails/day).
+2. Go to **Settings → Senders** and verify your sender email address.
+3. Go to **SMTP & API → API Keys** and create a key with transactional send permission.
+
+### 4. GitHub Secrets
 
 In your repo: **Settings → Secrets and variables → Actions → New repository secret**
 
@@ -44,8 +52,12 @@ In your repo: **Settings → Secrets and variables → Actions → New repositor
 | `FINNHUB_API_KEY` | Your Finnhub API key |
 | `WHATSAPP_PHONE` | Your number with country code, e.g. `+919876543210` |
 | `CALLMEBOT_API_KEY` | API key from CallMeBot |
+| `BREVO_API_KEY` | API key from Brevo |
+| `EMAIL_TO` | Recipient email, e.g. `you@gmail.com` |
+| `EMAIL_FROM` | Verified sender email in Brevo |
+| `EMAIL_FROM_NAME` | Display name, e.g. `Stock News Bot` (optional) |
 
-### 4. Push to GitHub and configure secrets
+### 5. Push to GitHub and configure secrets
 
 Use a **public** repo for unlimited free GitHub Actions minutes.
 
@@ -56,6 +68,9 @@ cd /Users/anisharajput/Documents/Github/stock-news-bot
 export FINNHUB_API_KEY="your-finnhub-key"
 export WHATSAPP_PHONE="+91xxxxxxxxxx"
 export CALLMEBOT_API_KEY="your-callmebot-key"
+export BREVO_API_KEY="your-brevo-api-key"
+export EMAIL_TO="you@example.com"
+export EMAIL_FROM="digest@yourdomain.com"
 ./scripts/bootstrap.sh
 ```
 
@@ -71,11 +86,11 @@ git push -u origin main   # after creating the repo on GitHub
 
 Or add secrets in the GitHub UI: **Settings → Secrets and variables → Actions**.
 
-### 5. Test
+### 6. Test
 
 1. Open **Actions** → **Daily Stock News** → **Run workflow**.
-2. Check the run logs for `WhatsApp message sent`.
-3. Confirm the message on your phone.
+2. Check the run logs for `WhatsApp message sent` and `Email sent`.
+3. Confirm the WhatsApp message and HTML email on your devices.
 
 ## Customize tickers
 
@@ -99,14 +114,19 @@ set -a && source .env && set +a
 python scripts/send_stock_news.py
 ```
 
+Email is skipped if `BREVO_API_KEY`, `EMAIL_TO`, or `EMAIL_FROM` are not set.
+
 ## Schedule
 
-The workflow cron is `30 2 * * *` (UTC) = **8:00 AM IST**.
+The workflow runs at:
+- `30 3 * * *` UTC = **9:00 AM IST**
+- `0 15 * * *` UTC = **8:30 PM IST**
 
-GitHub cron can run a few minutes late on the free tier — fine for a morning digest.
+GitHub cron can run a few minutes late on the free tier — fine for a morning/evening digest.
 
 ## Notes
 
 - CallMeBot is unofficial and for personal use only.
+- Brevo requires a verified sender address for reliable delivery.
 - Scheduled workflows may be disabled after 60 days of repo inactivity.
 - No secrets are stored in the repo — only the ticker list.

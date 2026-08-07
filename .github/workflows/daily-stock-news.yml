@@ -2,7 +2,8 @@ name: Daily Stock News
 
 on:
   schedule:
-    - cron: '30 2 * * *'   # 8:00 AM IST (UTC+5:30)
+    - cron: '30 3 * * *'   # 9:00 AM IST (UTC+5:30)
+    - cron: '0 15 * * *'   # 8:30 PM IST (UTC+5:30)
   workflow_dispatch:
 
 jobs:

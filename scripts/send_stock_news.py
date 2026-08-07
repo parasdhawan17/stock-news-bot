@@ -514,22 +514,50 @@ def prepare_email_layout(sections: list[dict]) -> dict:
     }
 
 
+def format_email_heading(layout: dict) -> str:
+    hero = layout.get("hero")
+    if not hero:
+        return "Your markets, twice a day"
+    ticker = hero["ticker"]
+    quote = hero.get("quote")
+    if not quote or quote.get("change_pct") is None:
+        return "Your markets, twice a day"
+    change_pct = quote["change_pct"]
+    if change_pct > 0:
+        return f"{ticker} moved high"
+    if change_pct < 0:
+        return f"{ticker} moved low"
+    return f"{ticker} held steady"
+
+
+def format_email_subject(layout: dict, date_label: str) -> str:
+    heading = format_email_heading(layout)
+    if heading == "Your markets, twice a day":
+        return f"Tickr Digest · {date_label}"
+    return f"{heading} · {date_label}"
+
+
 def build_email_digest(
     sections: list[dict], tickers: list[str], total_stories: int
-) -> tuple[str, str]:
+) -> tuple[str, str, str]:
     today_label = date.today().strftime("%d %b %Y")
     env = get_jinja_env()
     template = env.get_template("email_digest.html")
     layout = prepare_email_layout(sections)
+    email_heading = format_email_heading(layout)
+    subject = format_email_subject(layout, today_label)
     html = template.render(
         date_label=today_label,
         ticker_count=len(tickers),
         story_count=total_stories,
         site_url=SITE_URL,
+        email_heading=email_heading,
         **layout,
     )
-    text = build_plain_text(layout, today_label, len(tickers), total_stories)
-    return html, text
+    text = build_plain_text(
+        layout, today_label, len(tickers), total_stories, email_heading=email_heading
+    )
+    return html, text, subject
 
 
 def format_section_plain_text(section: dict, *, compact: bool = False) -> list[str]:
@@ -571,22 +599,28 @@ def format_section_plain_text(section: dict, *, compact: bool = False) -> list[s
 
 
 def build_plain_text(
-    layout: dict, date_label: str, ticker_count: int, story_count: int
+    layout: dict,
+    date_label: str,
+    ticker_count: int,
+    story_count: int,
+    *,
+    email_heading: str | None = None,
 ) -> str:
     summary = layout["market_summary"]
+    title = email_heading or f"Tickr Digest · {date_label}"
     lines = [
-        f"Stock News — {date_label}",
-        f"{ticker_count} tickers · {story_count} stories",
+        title,
+        f"{date_label} · {ticker_count} tickers · {story_count} stories",
         f"{summary['gainers']} up · {summary['losers']} down · {summary['flat']} flat",
         "",
     ]
 
     if layout["top_mover_label"]:
-        lines.append(f"Top mover today: {layout['top_mover_label']}")
+        lines.append(f"Today's biggest move: {layout['top_mover_label']}")
         lines.append("")
 
     if layout["hero"]:
-        lines.append("=== TOP MOVER ===")
+        lines.append("=== BIGGEST MOVER ===")
         lines.extend(format_section_plain_text(layout["hero"], compact=False))
 
     for section in layout["compact"]:
@@ -612,7 +646,7 @@ def build_web_digest(
     tickers: list[str],
     *,
     is_archive: bool = False,
-    archive_label: str | None = None,
+    fetched_at_label: str | None = None,
 ) -> str:
     today_label = date.today().strftime("%d %b %Y")
     layout = prepare_email_layout(sections)
@@ -627,7 +661,7 @@ def build_web_digest(
         story_count=web_story_count,
         site_url=SITE_URL,
         is_archive=is_archive,
-        archive_label=archive_label,
+        fetched_at_label=fetched_at_label,
         archives=archives,
         archive_href_prefix=archive_href_prefix,
         visible_story_count=HEADLINES_PER_TICKER,
@@ -676,14 +710,14 @@ def build_archive_index(archives: list[dict]) -> str:
 def write_web_pages(sections: list[dict], tickers: list[str]) -> None:
     generated_at = datetime.now(timezone.utc)
     archive_slug = generated_at.strftime("%Y-%m-%d-%H%M")
-    archive_label = generated_at.strftime("%d %b %Y, %H:%M UTC")
+    fetched_at_label = generated_at.strftime("%d %b %Y, %H:%M UTC")
 
-    html = build_web_digest(sections, tickers)
+    html = build_web_digest(sections, tickers, fetched_at_label=fetched_at_label)
     archive_html = build_web_digest(
         sections,
         tickers,
         is_archive=True,
-        archive_label=archive_label,
+        fetched_at_label=fetched_at_label,
     )
 
     DOCS_PATH.mkdir(parents=True, exist_ok=True)
@@ -787,9 +821,8 @@ def send_email(
     sender_email: str,
     recipients: list[str],
     sender_name: str,
+    subject: str,
 ) -> None:
-    today_label = date.today().strftime("%d %b %Y")
-    subject = f"Stock News — {today_label}"
     headers = {
         "api-key": api_key,
         "Content-Type": "application/json",
@@ -930,12 +963,12 @@ def main() -> None:
                             continue
                         user_sections = filter_sections(sections, user_tickers)
                         user_story_count = count_email_stories(user_sections)
-                        html, text = build_email_digest(
+                        html, text, subject = build_email_digest(
                             user_sections, user_tickers, user_story_count
                         )
                         print(
                             f"Prepared email for {email} "
-                            f"({len(user_tickers)} tickers, {len(html)} chars HTML)"
+                            f"({len(user_tickers)} tickers, subject: {subject})"
                         )
                         send_email(
                             html,
@@ -944,6 +977,7 @@ def main() -> None:
                             EMAIL_FROM,
                             [email],
                             EMAIL_FROM_NAME,
+                            subject,
                         )
                         sent_count += 1
                     if sent_count:
@@ -956,15 +990,15 @@ def main() -> None:
                     else sections
                 )
                 email_story_count = count_email_stories(email_sections)
-                html, text = build_email_digest(
+                html, text, subject = build_email_digest(
                     email_sections, fallback_tickers, email_story_count
                 )
                 print(
                     f"Prepared email for {EMAIL_TO} "
-                    f"({len(html)} chars HTML, {len(text)} chars plain text)"
+                    f"(subject: {subject}, {len(html)} chars HTML)"
                 )
                 send_email(
-                    html, text, BREVO_API_KEY, EMAIL_FROM, [EMAIL_TO], EMAIL_FROM_NAME
+                    html, text, BREVO_API_KEY, EMAIL_FROM, [EMAIL_TO], EMAIL_FROM_NAME, subject
                 )
             else:
                 print("No email recipients found; skipping email send.")

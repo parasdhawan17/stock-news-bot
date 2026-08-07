@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stock News — {{ date_label }}{% if is_archive %} (Archive){% endif %}</title>
+  <title>Tickr Digest — {{ date_label }}{% if is_archive %} (Archive){% endif %}</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -62,6 +62,24 @@
     }
     .nav a { color: #93c5fd; text-decoration: none; }
     .nav a:hover { text-decoration: underline; }
+    .header-subscribe-btn {
+      padding: 8px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .header-subscribe-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+    .subscribe-panel[hidden] {
+      display: none;
+    }
     .movers {
       display: flex;
       flex-wrap: wrap;
@@ -411,20 +429,23 @@
     <div class="card">
       <header class="header">
         <p class="eyebrow">Tickr Digest</p>
-        <h1>Stock News — {{ date_label }}</h1>
-        {% if is_archive and archive_label %}
-        <p class="muted">Archived {{ archive_label }}</p>
+        <h1>Your markets, twice a day</h1>
+        {% if fetched_at_label %}
+        <p class="muted">News fetched at {{ fetched_at_label }}</p>
         {% endif %}
-        <p>{{ ticker_count }} tickers · {{ story_count }} stories</p>
+        <p>{{ date_label }} · {{ ticker_count }} tickers · {{ story_count }} stories</p>
         <p class="muted">{{ market_summary.gainers }} up · {{ market_summary.losers }} down · {{ market_summary.flat }} flat</p>
         {% if top_mover_label %}
-        <p class="badge">Top mover today: <strong>{{ top_mover_label }}</strong></p>
+        <p class="badge">Today's biggest move: <strong>{{ top_mover_label }}</strong></p>
         {% endif %}
         <nav class="nav">
           {% if is_archive and site_url %}
           <a href="{{ site_url }}/">Latest digest</a>
           {% endif %}
-          <a href="#archives">Browse archives</a>
+          <a href="#archives">Past editions</a>
+          {% if subscribe_form_url %}
+          <button type="button" class="header-subscribe-btn" onclick="openSubscribeModal()">Subscribe</button>
+          {% endif %}
         </nav>
       </header>
 
@@ -441,9 +462,8 @@
       {% if subscribe_form_url %}
       <section class="subscribe-panel" id="subscribe">
         <div class="subscribe-cta" id="subscribe-cta">
-          <h2>Get this digest by email</h2>
-          <p>Pick the US tickers you want in your twice-daily email digest (9:00 AM and 8:30 PM IST). Choose from the list on the form — up to 10 per subscriber.</p>
-          <button type="button" class="subscribe-btn" onclick="openSubscribeModal()">Subscribe</button>
+          <h2>Get Tickr in your inbox</h2>
+          <p>Choose your stocks. We'll send headlines and price moves at 9:00 AM and 8:30 PM IST — only for the tickers you pick.</p>
         </div>
       </section>
       {% endif %}
@@ -478,7 +498,7 @@
         {% set cls = change_class(sec_quote) %}
         <section class="ticker-section{% if is_hero %} hero-section {{ cls }}{% elif is_highlight %} mover-highlight{% endif %}">
           {% if is_hero %}
-          <p class="section-label">Top Mover</p>
+          <p class="section-label">Biggest mover</p>
           {% endif %}
           <div class="ticker-header">
             {% if section.logo %}
@@ -537,7 +557,7 @@
       </div>
 
       <details class="archives-panel" id="archives">
-        <summary>Browse past digests{% if archives %} ({{ archives|length }}){% endif %}</summary>
+        <summary>Past editions{% if archives %} ({{ archives|length }}){% endif %}</summary>
         {% if archives %}
         <ul class="archive-list">
           {% for entry in archives %}
@@ -547,13 +567,13 @@
           {% endfor %}
         </ul>
         {% else %}
-        <p class="archives-empty">No archived digests yet.</p>
+        <p class="archives-empty">No past editions yet — check back after the next run.</p>
         {% endif %}
       </details>
 
       <footer class="footer">
-        <p>{{ ticker_count }} tickers · {{ story_count }} stories · stock-news-bot</p>
-        <p><a href="#archives">View past digests</a></p>
+        <p>Tickr Digest · your personalized stock brief</p>
+        <p><a href="#archives">Past editions</a></p>
       </footer>
     </div>
   </div>
@@ -562,7 +582,7 @@
     <div class="subscribe-modal-backdrop" onclick="closeSubscribeModal()"></div>
     <div class="subscribe-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title">
       <div class="subscribe-modal-header">
-        <h2 id="subscribe-modal-title">Subscribe to the digest</h2>
+        <h2 id="subscribe-modal-title">Subscribe to Tickr Digest</h2>
         <button type="button" class="subscribe-modal-close" onclick="closeSubscribeModal()" aria-label="Close">&times;</button>
       </div>
       <div class="subscribe-modal-body" id="subscribe-modal-body">
@@ -573,8 +593,8 @@
         ></iframe>
       </div>
       <div class="subscribe-success" id="subscribe-success" hidden>
-        <h3>You're subscribed!</h3>
-        <p>Check your email to confirm your subscription.</p>
+        <h3>You're in!</h3>
+        <p>Confirm your email, then pick up to 10 tickers on the form.</p>
       </div>
     </div>
   </div>
@@ -584,16 +604,24 @@
       var iframe = document.getElementById("subscribe-iframe");
       var modalBody = document.getElementById("subscribe-modal-body");
       var successPanel = document.getElementById("subscribe-success");
+      var subscribePanel = document.getElementById("subscribe");
       var iframeLoadCount = 0;
       var successHandled = false;
       var trustedOrigin = /sibforms\.com|brevo\.com|sendinblue\.com/i;
       var successPattern = /success|subscribed|confirm|thank|submitted|complete/i;
+
+      function hideSubscribePanel() {
+        if (subscribePanel) {
+          subscribePanel.hidden = true;
+        }
+      }
 
       window.openSubscribeModal = function () {
         successHandled = false;
         iframeLoadCount = 0;
         modalBody.hidden = false;
         successPanel.hidden = true;
+        hideSubscribePanel();
         iframe.src = iframe.dataset.src;
         modal.hidden = false;
         document.body.style.overflow = "hidden";
@@ -612,14 +640,9 @@
         successHandled = true;
         modalBody.hidden = true;
         successPanel.hidden = false;
+        hideSubscribePanel();
         window.setTimeout(function () {
           closeSubscribeModal();
-          var cta = document.getElementById("subscribe-cta");
-          if (cta) {
-            cta.innerHTML =
-              "<h2>Thanks for subscribing!</h2>" +
-              "<p>Check your email to confirm your subscription.</p>";
-          }
         }, 1800);
       }
 

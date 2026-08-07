@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stock News — {{ date_label }}</title>
+  <title>{{ email_heading }} · Tickr Digest</title>
 </head>
 <body style="margin:0;padding:0;background-color:#eef1f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1a1a2e;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#eef1f5;padding:24px 12px;">
@@ -15,11 +15,11 @@
           <tr>
             <td style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);padding:32px 28px;text-align:center;">
               <p style="margin:0 0 8px;font-size:11px;color:#94a3b8;letter-spacing:2px;text-transform:uppercase;font-weight:600;">Tickr Digest</p>
-              <h1 style="margin:0 0 10px;font-size:26px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">Stock News — {{ date_label }}</h1>
-              <p style="margin:0 0 6px;font-size:14px;color:#cbd5e1;">{{ ticker_count }} tickers · {{ story_count }} stories</p>
+              <h1 style="margin:0 0 10px;font-size:26px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">{{ email_heading }}</h1>
+              <p style="margin:0 0 6px;font-size:14px;color:#cbd5e1;">{{ date_label }} · {{ ticker_count }} tickers · {{ story_count }} stories</p>
               <p style="margin:0;font-size:13px;color:#94a3b8;">{{ market_summary.gainers }} up · {{ market_summary.losers }} down · {{ market_summary.flat }} flat</p>
               {% if top_mover_label %}
-              <p style="margin:14px 0 0;font-size:13px;color:#e2e8f0;background-color:rgba(255,255,255,0.1);display:inline-block;padding:6px 14px;border-radius:20px;">Top mover today: <strong>{{ top_mover_label }}</strong></p>
+              <p style="margin:14px 0 0;font-size:13px;color:#e2e8f0;background-color:rgba(255,255,255,0.1);display:inline-block;padding:6px 14px;border-radius:20px;">Today's biggest move: <strong>{{ top_mover_label }}</strong></p>
               {% endif %}
             </td>
           </tr>
@@ -56,7 +56,7 @@
           {% set hero_negative = hero_quote and hero_quote.change_pct is not none and hero_quote.change_pct < 0 %}
           <tr>
             <td style="padding:24px 24px 8px;">
-              <p style="margin:0 0 12px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#64748b;">Top Mover</p>
+              <p style="margin:0 0 12px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#64748b;">Biggest mover</p>
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;border-left:4px solid {% if hero_positive %}#16a34a{% elif hero_negative %}#dc2626{% else %}#94a3b8{% endif %};">
                 <tr>
                   <td style="padding:20px 20px 16px;background-color:#fafbfc;">
@@ -216,9 +216,9 @@
           <!-- Footer -->
           <tr>
             <td style="padding:24px 28px;background-color:#f8fafc;border-top:1px solid #e8ecf0;text-align:center;">
-              <p style="margin:0;font-size:12px;color:#94a3b8;">{{ ticker_count }} tickers · {{ story_count }} stories · stock-news-bot</p>
+              <p style="margin:0;font-size:12px;color:#94a3b8;">Tickr Digest · your personalized stock brief</p>
               {% if site_url %}
-              <p style="margin:8px 0 0;font-size:12px;"><a href="{{ site_url }}/" style="color:#64748b;text-decoration:none;">Read full digest online</a></p>
+              <p style="margin:8px 0 0;font-size:12px;"><a href="{{ site_url }}/" style="color:#64748b;text-decoration:none;">See the full digest online</a></p>
               {% endif %}
             </td>
           </tr>

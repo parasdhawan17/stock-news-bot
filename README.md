@@ -1,113 +1,162 @@
 # Stock News Bot
 
-Daily US stock news digest delivered to WhatsApp, email, and a GitHub Pages web digest.
+A zero-cost daily US stock news digest. Fetches headlines and quotes from Finnhub, publishes a live web digest on GitHub Pages, and optionally delivers via email or WhatsApp.
 
-**Cost: $0** — Finnhub free API, CallMeBot free WhatsApp delivery, Brevo free email tier, GitHub Pages, GitHub Actions on a public repo.
+**Cost: $0** — Finnhub free API, Brevo free email tier, GitHub Pages, GitHub Actions on a public repo. WhatsApp via CallMeBot is also free if enabled.
+
+## Features
+
+- **Web digest** — published to GitHub Pages with top movers highlighted, mover-ranked sections, 3 stories per ticker (expand for up to 10), and a collapsible in-page archive browser
+- **Email digest** — rich HTML email with tiered mover layout, thumbnails, and summaries via Brevo
+- **WhatsApp digest** — tiered plain-text messages via CallMeBot (optional, disabled by default in CI)
+- **Automated** — runs twice daily on GitHub Actions; each run archives a timestamped snapshot
 
 ## How it works
 
 1. GitHub Actions runs twice daily (9:00 AM and 8:30 PM IST) or manually via **Run workflow**.
 2. The script reads tickers from `config/tickers.json`.
 3. Finnhub fetches the last 24 hours of headlines and real-time quotes per ticker.
-4. Optionally send a formatted message to WhatsApp via CallMeBot (`--whatsapp`).
-5. Optionally send a rich HTML email digest via Brevo (`--email`).
-6. A detailed web digest is always generated into `docs/` and published via GitHub Pages — top movers highlighted, 3 stories per ticker with expand for more, and in-page archive browsing.
+4. A web digest is always generated into `docs/` and published to GitHub Pages.
+5. Email is sent when `--email` is passed (enabled in the GitHub workflow).
+6. WhatsApp is sent when `--whatsapp` is passed (opt-in; not enabled in CI by default).
+
+## Delivery channels
+
+The web digest always runs. Email and WhatsApp are opt-in via CLI flags:
+
+| Command | Web | Email | WhatsApp |
+|---------|-----|-------|----------|
+| `python scripts/send_stock_news.py` | yes | — | — |
+| `python scripts/send_stock_news.py --email` | yes | yes | — |
+| `python scripts/send_stock_news.py --whatsapp` | yes | — | yes |
+| `python scripts/send_stock_news.py --all` | yes | yes | yes |
+
+Credentials are only required for the channels you enable. The GitHub workflow runs with `--email` only.
+
+To re-enable WhatsApp in CI, add the WhatsApp secrets back and update the workflow command:
+
+```yaml
+run: python scripts/send_stock_news.py --email --whatsapp
+# or
+run: python scripts/send_stock_news.py --all
+```
+
+## Web digest
+
+After enabling GitHub Pages, the site is live at:
+
+```
+https://<your-username>.github.io/<repo-name>/
+```
+
+Each workflow run:
+
+- Overwrites `docs/index.html` with the latest digest
+- Saves a snapshot to `docs/archive/YYYY-MM-DD-HHMM.html`
+- Updates the archive index at `docs/archive/index.html`
+
+The digest UI includes a movers summary bar, a featured top-mover section, ranked ticker cards, and a collapsible "Browse past digests" panel on the same page.
 
 ## Project structure
 
 ```
 stock-news-bot/
 ├── .github/workflows/daily-stock-news.yml
-├── config/tickers.json
-├── docs/                          # Generated web digest (GitHub Pages)
-├── scripts/send_stock_news.py
+├── config/tickers.json              # Ticker watchlist
+├── docs/                            # Generated web digest (GitHub Pages)
+│   ├── index.html
+│   └── archive/
+├── scripts/
+│   ├── send_stock_news.py           # Main script
+│   ├── bootstrap.sh                 # One-time GitHub setup (optional)
+│   └── configure_secrets.sh         # Set GitHub Actions secrets (optional)
 ├── templates/
-│   ├── email_digest.html
 │   ├── web_digest.html
+│   ├── email_digest.html
 │   └── archive_index.html
+├── .env.example
 ├── requirements.txt
 └── README.md
 ```
 
 ## Setup
 
-### 1. Finnhub API key
+### 1. Finnhub API key (required)
 
 1. Sign up at [finnhub.io](https://finnhub.io/).
 2. Copy your API key from the dashboard.
 
-### 2. CallMeBot WhatsApp authorization (optional)
-
-Only needed if you pass `--whatsapp`. Skip this section if you are using email and web only.
-
-1. Save **+34 644 44 71 67** as a WhatsApp contact (e.g. "CallMeBot").
-2. Send it: `I allow callmebot to send me messages`
-3. It replies with your personal API key — save this for the next step.
-
-### 3. Brevo email setup
+### 2. Brevo email setup (required for `--email`)
 
 1. Sign up at [brevo.com](https://www.brevo.com/) (free tier: 300 emails/day).
 2. Go to **Settings → Senders** and verify your sender email address.
 3. Go to **SMTP & API → API Keys** and create a key with transactional send permission.
 
+### 3. CallMeBot WhatsApp setup (optional, for `--whatsapp`)
+
+1. Save **+34 644 44 71 67** as a WhatsApp contact (e.g. "CallMeBot").
+2. Send it: `I allow callmebot to send me messages`
+3. It replies with your personal API key — save this for later.
+
 ### 4. GitHub Secrets
 
 In your repo: **Settings → Secrets and variables → Actions → New repository secret**
 
+**Required for the default workflow:**
+
 | Secret | Value |
 |--------|-------|
 | `FINNHUB_API_KEY` | Your Finnhub API key |
-| `WHATSAPP_PHONE` | Your number with country code (only if using `--whatsapp`) |
-| `CALLMEBOT_API_KEY` | API key from CallMeBot (only if using `--whatsapp`) |
 | `BREVO_API_KEY` | API key from Brevo |
 | `EMAIL_TO` | Recipient email, e.g. `you@gmail.com` |
 | `EMAIL_FROM` | Verified sender email in Brevo |
 | `EMAIL_FROM_NAME` | Display name, e.g. `Stock News Bot` (optional) |
 
-### 5. Push to GitHub and configure secrets
+**Only if using `--whatsapp`:**
+
+| Secret | Value |
+|--------|-------|
+| `WHATSAPP_PHONE` | Your number with country code, e.g. `+919876543210` |
+| `CALLMEBOT_API_KEY` | API key from CallMeBot |
+
+`SITE_URL` is set automatically in the workflow so email footers link to the web digest.
+
+### 5. Push to GitHub
 
 Use a **public** repo for unlimited free GitHub Actions minutes.
 
-**Option A — automated (recommended):**
+**Option A — GitHub CLI:**
 
 ```bash
-cd /Users/anisharajput/Documents/Github/stock-news-bot
 export FINNHUB_API_KEY="your-finnhub-key"
-export WHATSAPP_PHONE="+91xxxxxxxxxx"
-export CALLMEBOT_API_KEY="your-callmebot-key"
 export BREVO_API_KEY="your-brevo-api-key"
 export EMAIL_TO="you@example.com"
 export EMAIL_FROM="digest@yourdomain.com"
-./scripts/bootstrap.sh
-```
-
-This script pushes to GitHub, sets all secrets, and triggers a test workflow run.
-
-**Option B — manual:**
-
-```bash
-cd /Users/anisharajput/Documents/Github/stock-news-bot
-git push -u origin main   # after creating the repo on GitHub
+# For email-only, add secrets via GitHub UI (see Option B).
+# configure_secrets.sh also requires WhatsApp vars if you use it:
+export WHATSAPP_PHONE="+91xxxxxxxxxx"
+export CALLMEBOT_API_KEY="your-callmebot-key"
 ./scripts/configure_secrets.sh
+git push -u origin main
 ```
 
-Or add secrets in the GitHub UI: **Settings → Secrets and variables → Actions**.
+**Option B — manual (recommended for email-only):**
+
+1. Push the repo to GitHub.
+2. Add the required secrets in **Settings → Secrets and variables → Actions**.
 
 ### 6. Enable GitHub Pages
 
 1. In your repo: **Settings → Pages**.
 2. Under **Build and deployment**, set **Source** to **Deploy from a branch**.
 3. Set **Branch** to `main` and **Folder** to `/docs`.
-4. Save. The site will be live at `https://<your-username>.github.io/<repo-name>/`.
-5. The web digest highlights top movers, shows 3 stories per ticker (expand for more), and includes a collapsible archives panel on the same page. Past digests are also saved at `/archive/` (each workflow run creates a new dated page).
-
-The workflow sets `SITE_URL` automatically so email footers link to the web digest. It runs with `--email` only; add `--whatsapp` to the workflow command when you want WhatsApp delivery again.
+4. Save.
 
 ### 7. Test
 
-1. Open **Actions** → **Daily Stock News** → **Run workflow**.
+1. Open **Actions → Daily Stock News → Run workflow**.
 2. Check the run logs for `Web digest written` and `Email sent`.
-3. Confirm the HTML email and web page on your devices.
+3. Open the web digest URL and confirm the email arrived.
 
 ## Customize tickers
 
@@ -119,32 +168,34 @@ Edit `config/tickers.json`:
 }
 ```
 
-US symbols use plain tickers. Keep the list to ~10 tickers to stay within message length limits.
+US symbols use plain tickers. Keep the list to ~10 tickers to stay within WhatsApp message limits if you enable that channel.
 
 ## Local testing
 
-Copy `.env.example` to `.env` and fill in your keys, then:
+Copy `.env.example` to `.env` and fill in your keys:
 
 ```bash
 pip install -r requirements.txt
 set -a && source .env && set +a
+
 python scripts/send_stock_news.py              # web digest only
 python scripts/send_stock_news.py --email      # web + email
 python scripts/send_stock_news.py --whatsapp   # web + WhatsApp
 python scripts/send_stock_news.py --all        # web + email + WhatsApp
 ```
 
-This generates `docs/index.html` locally. Open it in a browser to preview the web digest — top movers are featured first, each ticker shows 3 stories with a "see more" expander, and past digests are browsable via the archives panel at the bottom.
-
-Email and WhatsApp are opt-in via flags. Credentials are only required for the channels you enable.
+This writes `docs/index.html` locally. Open it in a browser to preview the digest.
 
 Set `SITE_URL` in `.env` to include the web digest link in email and WhatsApp footers during local runs.
 
 ## Schedule
 
 The workflow runs at:
-- `30 3 * * *` UTC = **9:00 AM IST**
-- `0 15 * * *` UTC = **8:30 PM IST**
+
+| Cron (UTC) | Time (IST) |
+|------------|------------|
+| `30 3 * * *` | 9:00 AM |
+| `0 15 * * *` | 8:30 PM |
 
 GitHub cron can run a few minutes late on the free tier — fine for a morning/evening digest.
 
@@ -153,4 +204,4 @@ GitHub cron can run a few minutes late on the free tier — fine for a morning/e
 - CallMeBot is unofficial and for personal use only.
 - Brevo requires a verified sender address for reliable delivery.
 - Scheduled workflows may be disabled after 60 days of repo inactivity.
-- No secrets are stored in the repo — only the ticker list.
+- No secrets are stored in the repo — only the ticker list and generated `docs/` output.

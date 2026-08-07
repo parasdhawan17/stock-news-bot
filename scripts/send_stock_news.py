@@ -4,6 +4,7 @@
 import argparse
 import json
 import os
+import re
 import sys
 import time
 import urllib.parse
@@ -18,6 +19,8 @@ HEADLINES_PER_TICKER = 3
 WEB_HEADLINES_PER_TICKER = FETCH_LIMIT_PER_TICKER = 10
 SEND_DELAY_SECONDS = 2
 SUMMARY_EXCERPT_LENGTH = 160
+MAX_TICKERS_PER_USER = 10
+TICKER_PATTERN = re.compile(r"^[A-Z][A-Z0-9.]{0,9}$")
 
 # Finnhub often returns publisher branding instead of article photos.
 PUBLISHER_LOGO_MARKERS = (
@@ -35,6 +38,7 @@ CALLMEBOT_KEY = os.environ.get("CALLMEBOT_API_KEY")
 BREVO_API_KEY = os.environ.get("BREVO_API_KEY")
 BREVO_LIST_ID = os.environ.get("BREVO_LIST_ID")
 BREVO_SUBSCRIBE_FORM_URL = os.environ.get("BREVO_SUBSCRIBE_FORM_URL", "").strip()
+BREVO_TICKERS_ATTRIBUTE = os.environ.get("BREVO_TICKERS_ATTRIBUTE", "TICKERS").strip().upper()
 EMAIL_TO = os.environ.get("EMAIL_TO")
 EMAIL_FROM = os.environ.get("EMAIL_FROM")
 EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "Stock News Bot")
@@ -61,6 +65,54 @@ def load_tickers() -> list[str]:
         print("Error: no tickers configured in config/tickers.json", file=sys.stderr)
         sys.exit(1)
     return tickers
+
+
+def parse_tickers(raw: str | list | tuple | None) -> list[str]:
+    """Parse tickers from Brevo text or multiple-choice attribute values."""
+    if raw is None:
+        return []
+
+    if isinstance(raw, (list, tuple)):
+        parts = [str(item) for item in raw]
+    else:
+        text = str(raw).strip()
+        if not text:
+            return []
+        parts = re.split(r"[,;\s]+", text)
+
+    seen: set[str] = set()
+    result: list[str] = []
+    for part in parts:
+        ticker = part.strip().upper()
+        if not ticker or ticker in seen:
+            continue
+        if not TICKER_PATTERN.match(ticker):
+            continue
+        seen.add(ticker)
+        result.append(ticker)
+        if len(result) >= MAX_TICKERS_PER_USER:
+            break
+    return result
+
+
+def union_tickers(subscribers: list[dict]) -> list[str]:
+    seen: set[str] = set()
+    result: list[str] = []
+    for subscriber in subscribers:
+        for ticker in subscriber.get("tickers", []):
+            if ticker not in seen:
+                seen.add(ticker)
+                result.append(ticker)
+    return result
+
+
+def filter_sections(sections: list[dict], tickers: list[str]) -> list[dict]:
+    ticker_set = set(tickers)
+    return [section for section in sections if section["ticker"] in ticker_set]
+
+
+def count_email_stories(sections: list[dict]) -> int:
+    return sum(len(section.get("stories", [])) for section in sections)
 
 
 def fetch_news(symbol: str, api_key: str, limit: int = FETCH_LIMIT_PER_TICKER) -> list[dict]:
@@ -659,17 +711,17 @@ def send_whatsapp_messages(messages: list[str], phone: str, api_key: str) -> Non
             time.sleep(SEND_DELAY_SECONDS)
 
 
-def fetch_subscribers(list_id: int, api_key: str) -> list[str]:
+def fetch_subscribers_with_tickers(list_id: int, api_key: str) -> list[dict]:
     headers = {"api-key": api_key, "Accept": "application/json"}
-    emails: list[str] = []
+    subscribers: list[dict] = []
     offset = 0
     limit = 50
 
     while True:
         response = requests.get(
-            f"https://api.brevo.com/v3/contacts/lists/{list_id}/contacts",
+            "https://api.brevo.com/v3/contacts",
             headers=headers,
-            params={"limit": limit, "offset": offset},
+            params={"limit": limit, "offset": offset, "listIds": [list_id]},
             timeout=30,
         )
         response.raise_for_status()
@@ -681,14 +733,18 @@ def fetch_subscribers(list_id: int, api_key: str) -> list[str]:
             if contact.get("emailBlacklisted"):
                 continue
             email = contact.get("email", "").strip()
-            if email:
-                emails.append(email)
+            if not email:
+                continue
+            attributes = contact.get("attributes") or {}
+            raw_tickers = attributes.get(BREVO_TICKERS_ATTRIBUTE, "")
+            tickers = parse_tickers(raw_tickers)
+            subscribers.append({"email": email, "tickers": tickers})
 
         if len(contacts) < limit:
             break
         offset += limit
 
-    return emails
+    return subscribers
 
 
 def send_email(
@@ -728,14 +784,13 @@ def send_email(
             time.sleep(SEND_DELAY_SECONDS)
 
 
-def resolve_email_recipients(api_key: str) -> list[str]:
-    if BREVO_LIST_ID:
-        recipients = fetch_subscribers(int(BREVO_LIST_ID), api_key)
-        print(f"Fetched {len(recipients)} subscriber(s) from Brevo list {BREVO_LIST_ID}")
-        return recipients
-    if EMAIL_TO:
-        return [EMAIL_TO]
-    return []
+def resolve_digest_tickers(subscribers: list[dict]) -> list[str]:
+    union = union_tickers(subscribers)
+    if union:
+        print(f"Using {len(union)} ticker(s) from subscriber union")
+        return union
+    print("No subscriber tickers found; using config/tickers.json")
+    return load_tickers()
 
 
 def email_configured() -> bool:
@@ -772,18 +827,32 @@ def main() -> None:
 
     finnhub_key = require_env("FINNHUB_API_KEY", FINNHUB_KEY)
 
-    tickers = load_tickers()
-    sections, total_stories = collect_digest_data(tickers, finnhub_key)
+    subscribers: list[dict] = []
+    if BREVO_LIST_ID and BREVO_API_KEY:
+        subscribers = fetch_subscribers_with_tickers(int(BREVO_LIST_ID), BREVO_API_KEY)
+        print(f"Fetched {len(subscribers)} subscriber(s) from Brevo list {BREVO_LIST_ID}")
+        digest_tickers = resolve_digest_tickers(subscribers)
+    else:
+        digest_tickers = load_tickers()
 
-    write_web_pages(sections, tickers)
+    sections, _ = collect_digest_data(digest_tickers, finnhub_key)
+    write_web_pages(sections, digest_tickers)
 
     if send_whatsapp_digest:
         phone = require_env("WHATSAPP_PHONE", WHATSAPP_PHONE)
         callmebot_key = require_env("CALLMEBOT_API_KEY", CALLMEBOT_KEY)
-        messages = build_messages(sections, tickers, total_stories)
+        whatsapp_tickers = load_tickers()
+        if whatsapp_tickers == digest_tickers:
+            whatsapp_sections = sections
+            whatsapp_total_stories = count_email_stories(sections)
+        else:
+            whatsapp_sections, whatsapp_total_stories = collect_digest_data(
+                whatsapp_tickers, finnhub_key
+            )
+        messages = build_messages(whatsapp_sections, whatsapp_tickers, whatsapp_total_stories)
         total_chars = sum(len(message) for message in messages)
         print(
-            f"Prepared {len(messages)} WhatsApp messages for {len(tickers)} tickers "
+            f"Prepared {len(messages)} WhatsApp messages for {len(whatsapp_tickers)} tickers "
             f"({total_chars} chars total)"
         )
         send_whatsapp_messages(messages, phone, callmebot_key)
@@ -799,16 +868,61 @@ def main() -> None:
             )
             sys.exit(1)
         try:
-            recipients = resolve_email_recipients(BREVO_API_KEY)
-            if not recipients:
-                print("No email recipients found; skipping email send.")
-            else:
-                html, text = build_email_digest(sections, tickers, total_stories)
+            if BREVO_LIST_ID:
+                if not subscribers and BREVO_API_KEY:
+                    subscribers = fetch_subscribers_with_tickers(
+                        int(BREVO_LIST_ID), BREVO_API_KEY
+                    )
+                if not subscribers:
+                    print("No email recipients found; skipping email send.")
+                else:
+                    sent_count = 0
+                    for subscriber in subscribers:
+                        email = subscriber["email"]
+                        user_tickers = subscriber["tickers"]
+                        if not user_tickers:
+                            print(f"Skipped {email}: no valid tickers")
+                            continue
+                        user_sections = filter_sections(sections, user_tickers)
+                        user_story_count = count_email_stories(user_sections)
+                        html, text = build_email_digest(
+                            user_sections, user_tickers, user_story_count
+                        )
+                        print(
+                            f"Prepared email for {email} "
+                            f"({len(user_tickers)} tickers, {len(html)} chars HTML)"
+                        )
+                        send_email(
+                            html,
+                            text,
+                            BREVO_API_KEY,
+                            EMAIL_FROM,
+                            [email],
+                            EMAIL_FROM_NAME,
+                        )
+                        sent_count += 1
+                    if sent_count:
+                        print(f"Sent {sent_count} personalized email(s)")
+            elif EMAIL_TO:
+                fallback_tickers = load_tickers()
+                email_sections = (
+                    filter_sections(sections, fallback_tickers)
+                    if digest_tickers != fallback_tickers
+                    else sections
+                )
+                email_story_count = count_email_stories(email_sections)
+                html, text = build_email_digest(
+                    email_sections, fallback_tickers, email_story_count
+                )
                 print(
-                    f"Prepared email for {len(recipients)} recipient(s) "
+                    f"Prepared email for {EMAIL_TO} "
                     f"({len(html)} chars HTML, {len(text)} chars plain text)"
                 )
-                send_email(html, text, BREVO_API_KEY, EMAIL_FROM, recipients, EMAIL_FROM_NAME)
+                send_email(
+                    html, text, BREVO_API_KEY, EMAIL_FROM, [EMAIL_TO], EMAIL_FROM_NAME
+                )
+            else:
+                print("No email recipients found; skipping email send.")
         except requests.RequestException as exc:
             print(f"Warning: failed to send email: {exc}", file=sys.stderr)
     else:

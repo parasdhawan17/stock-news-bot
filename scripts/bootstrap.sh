@@ -11,7 +11,8 @@
 #   export WHATSAPP_PHONE="+91xxxxxxxxxx"
 #   export CALLMEBOT_API_KEY="your-callmebot-key"
 #   export BREVO_API_KEY="your-brevo-api-key"
-#   export EMAIL_TO="you@example.com"
+#   export BREVO_LIST_ID="2"
+#   export BREVO_SUBSCRIBE_FORM_URL="https://my.brevo.com/subscribe/your-form-id"
 #   export EMAIL_FROM="digest@yourdomain.com"
 #   ./scripts/bootstrap.sh
 

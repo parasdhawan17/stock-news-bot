@@ -33,6 +33,8 @@ FINNHUB_KEY = os.environ.get("FINNHUB_API_KEY")
 WHATSAPP_PHONE = os.environ.get("WHATSAPP_PHONE")
 CALLMEBOT_KEY = os.environ.get("CALLMEBOT_API_KEY")
 BREVO_API_KEY = os.environ.get("BREVO_API_KEY")
+BREVO_LIST_ID = os.environ.get("BREVO_LIST_ID")
+BREVO_SUBSCRIBE_FORM_URL = os.environ.get("BREVO_SUBSCRIBE_FORM_URL", "").strip()
 EMAIL_TO = os.environ.get("EMAIL_TO")
 EMAIL_FROM = os.environ.get("EMAIL_FROM")
 EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "Stock News Bot")
@@ -562,6 +564,7 @@ def build_web_digest(
         archives=archives,
         archive_href_prefix=archive_href_prefix,
         visible_story_count=HEADLINES_PER_TICKER,
+        subscribe_form_url=BREVO_SUBSCRIBE_FORM_URL or None,
         **layout,
     )
 
@@ -656,37 +659,88 @@ def send_whatsapp_messages(messages: list[str], phone: str, api_key: str) -> Non
             time.sleep(SEND_DELAY_SECONDS)
 
 
+def fetch_subscribers(list_id: int, api_key: str) -> list[str]:
+    headers = {"api-key": api_key, "Accept": "application/json"}
+    emails: list[str] = []
+    offset = 0
+    limit = 50
+
+    while True:
+        response = requests.get(
+            f"https://api.brevo.com/v3/contacts/lists/{list_id}/contacts",
+            headers=headers,
+            params={"limit": limit, "offset": offset},
+            timeout=30,
+        )
+        response.raise_for_status()
+        contacts = response.json().get("contacts", [])
+        if not contacts:
+            break
+
+        for contact in contacts:
+            if contact.get("emailBlacklisted"):
+                continue
+            email = contact.get("email", "").strip()
+            if email:
+                emails.append(email)
+
+        if len(contacts) < limit:
+            break
+        offset += limit
+
+    return emails
+
+
 def send_email(
     html: str,
     text: str,
     api_key: str,
     sender_email: str,
-    recipient_email: str,
+    recipients: list[str],
     sender_name: str,
 ) -> None:
     today_label = date.today().strftime("%d %b %Y")
-    response = requests.post(
-        "https://api.brevo.com/v3/smtp/email",
-        headers={
-            "api-key": api_key,
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        },
-        json={
-            "sender": {"name": sender_name, "email": sender_email},
-            "to": [{"email": recipient_email}],
-            "subject": f"Stock News — {today_label}",
-            "htmlContent": html,
-            "textContent": text,
-        },
-        timeout=30,
-    )
-    response.raise_for_status()
-    print("Email sent:", response.json().get("messageId", response.text))
+    subject = f"Stock News — {today_label}"
+    headers = {
+        "api-key": api_key,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    payload_base = {
+        "sender": {"name": sender_name, "email": sender_email},
+        "subject": subject,
+        "htmlContent": html,
+        "textContent": text,
+    }
+
+    total = len(recipients)
+    for index, recipient_email in enumerate(recipients, start=1):
+        response = requests.post(
+            "https://api.brevo.com/v3/smtp/email",
+            headers=headers,
+            json={**payload_base, "to": [{"email": recipient_email}]},
+            timeout=30,
+        )
+        response.raise_for_status()
+        message_id = response.json().get("messageId", response.text)
+        print(f"Email sent to {recipient_email} ({index}/{total}): {message_id}")
+        if index < total:
+            time.sleep(SEND_DELAY_SECONDS)
+
+
+def resolve_email_recipients(api_key: str) -> list[str]:
+    if BREVO_LIST_ID:
+        recipients = fetch_subscribers(int(BREVO_LIST_ID), api_key)
+        print(f"Fetched {len(recipients)} subscriber(s) from Brevo list {BREVO_LIST_ID}")
+        return recipients
+    if EMAIL_TO:
+        return [EMAIL_TO]
+    return []
 
 
 def email_configured() -> bool:
-    return bool(BREVO_API_KEY and EMAIL_TO and EMAIL_FROM)
+    has_recipients = bool(BREVO_LIST_ID or EMAIL_TO)
+    return bool(BREVO_API_KEY and EMAIL_FROM and has_recipients)
 
 
 def parse_args() -> argparse.Namespace:
@@ -739,14 +793,22 @@ def main() -> None:
     if send_email_digest:
         if not email_configured():
             print(
-                "Error: --email requested but BREVO_API_KEY, EMAIL_TO, or EMAIL_FROM is not set.",
+                "Error: --email requested but BREVO_API_KEY, EMAIL_FROM, and "
+                "BREVO_LIST_ID or EMAIL_TO are not set.",
                 file=sys.stderr,
             )
             sys.exit(1)
         try:
-            html, text = build_email_digest(sections, tickers, total_stories)
-            print(f"Prepared email ({len(html)} chars HTML, {len(text)} chars plain text)")
-            send_email(html, text, BREVO_API_KEY, EMAIL_FROM, EMAIL_TO, EMAIL_FROM_NAME)
+            recipients = resolve_email_recipients(BREVO_API_KEY)
+            if not recipients:
+                print("No email recipients found; skipping email send.")
+            else:
+                html, text = build_email_digest(sections, tickers, total_stories)
+                print(
+                    f"Prepared email for {len(recipients)} recipient(s) "
+                    f"({len(html)} chars HTML, {len(text)} chars plain text)"
+                )
+                send_email(html, text, BREVO_API_KEY, EMAIL_FROM, recipients, EMAIL_FROM_NAME)
         except requests.RequestException as exc:
             print(f"Warning: failed to send email: {exc}", file=sys.stderr)
     else:

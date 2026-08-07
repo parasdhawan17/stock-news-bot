@@ -8,6 +8,7 @@ A zero-cost daily US stock news digest. Fetches headlines and quotes from Finnhu
 
 - **Web digest** — published to GitHub Pages with top movers highlighted, mover-ranked sections, 3 stories per ticker (expand for up to 10), and a collapsible in-page archive browser
 - **Email digest** — rich HTML email with tiered mover layout, thumbnails, and summaries via Brevo
+- **Email subscriptions** — Brevo embedded subscribe form on the web digest; workflow sends to all list contacts
 - **WhatsApp digest** — tiered plain-text messages via CallMeBot (optional, disabled by default in CI)
 - **Automated** — runs twice daily on GitHub Actions; each run archives a timestamped snapshot
 
@@ -55,7 +56,24 @@ Each workflow run:
 - Saves a snapshot to `docs/archive/YYYY-MM-DD-HHMM.html`
 - Updates the archive index at `docs/archive/index.html`
 
-The digest UI includes a movers summary bar, a featured top-mover section, ranked ticker cards, and a collapsible "Browse past digests" panel on the same page.
+The digest UI includes a movers summary bar, a featured top-mover section, ranked ticker cards, a collapsible "Browse past digests" panel, and an optional email subscribe form.
+
+## Email subscriptions
+
+Visitors can subscribe from the web digest via a Brevo embedded form. Each workflow run fetches all contacts from your Brevo list and sends the digest to each subscriber individually.
+
+### One-time Brevo setup
+
+1. In Brevo: **Contacts → Lists** → create a list (e.g. "Stock News Subscribers") and note the **list ID** (shown in the list URL or settings).
+2. In Brevo: **Forms** → create a subscription form linked to that list.
+   - Enable **double opt-in** (recommended) so only confirmed addresses receive mail.
+3. Open the form's **Share** settings and copy the **embed URL** (the iframe `src`, e.g. `https://my.brevo.com/subscribe/...`).
+
+### Limits
+
+- **Brevo free tier:** 300 emails/day. With 2 runs/day, you can support roughly 150 subscribers.
+- **Double opt-in:** New signups must confirm via Brevo before they appear in the list and receive digests.
+- **Unsubscribe:** Managed automatically by Brevo for list contacts.
 
 ## Project structure
 
@@ -91,6 +109,7 @@ stock-news-bot/
 1. Sign up at [brevo.com](https://www.brevo.com/) (free tier: 300 emails/day).
 2. Go to **Settings → Senders** and verify your sender email address.
 3. Go to **SMTP & API → API Keys** and create a key with transactional send permission.
+4. Set up a contact list and subscription form (see [Email subscriptions](#email-subscriptions)).
 
 ### 3. CallMeBot WhatsApp setup (optional, for `--whatsapp`)
 
@@ -108,9 +127,16 @@ In your repo: **Settings → Secrets and variables → Actions → New repositor
 |--------|-------|
 | `FINNHUB_API_KEY` | Your Finnhub API key |
 | `BREVO_API_KEY` | API key from Brevo |
-| `EMAIL_TO` | Recipient email, e.g. `you@gmail.com` |
+| `BREVO_LIST_ID` | Numeric ID of your Brevo subscriber list |
+| `BREVO_SUBSCRIBE_FORM_URL` | Full iframe embed URL from your Brevo form |
 | `EMAIL_FROM` | Verified sender email in Brevo |
 | `EMAIL_FROM_NAME` | Display name, e.g. `Stock News Bot` (optional) |
+
+**Optional fallback (single recipient instead of a list):**
+
+| Secret | Value |
+|--------|-------|
+| `EMAIL_TO` | Recipient email, e.g. `you@gmail.com` (used only when `BREVO_LIST_ID` is not set) |
 
 **Only if using `--whatsapp`:**
 
@@ -130,7 +156,8 @@ Use a **public** repo for unlimited free GitHub Actions minutes.
 ```bash
 export FINNHUB_API_KEY="your-finnhub-key"
 export BREVO_API_KEY="your-brevo-api-key"
-export EMAIL_TO="you@example.com"
+export BREVO_LIST_ID="2"
+export BREVO_SUBSCRIBE_FORM_URL="https://my.brevo.com/subscribe/your-form-id"
 export EMAIL_FROM="digest@yourdomain.com"
 # For email-only, add secrets via GitHub UI (see Option B).
 # configure_secrets.sh also requires WhatsApp vars if you use it:
@@ -155,8 +182,8 @@ git push -u origin main
 ### 7. Test
 
 1. Open **Actions → Daily Stock News → Run workflow**.
-2. Check the run logs for `Web digest written` and `Email sent`.
-3. Open the web digest URL and confirm the email arrived.
+2. Check the run logs for `Web digest written` and `Email sent to ...`.
+3. Open the web digest URL, confirm the subscribe form appears, and verify email delivery.
 
 ## Customize tickers
 

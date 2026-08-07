@@ -62,20 +62,33 @@
     }
     .nav a { color: #93c5fd; text-decoration: none; }
     .nav a:hover { text-decoration: underline; }
+    .header-nav-link {
+      padding: 0;
+      border: none;
+      background: none;
+      color: #93c5fd;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .header-nav-link:hover { text-decoration: underline; }
     .header-subscribe-btn {
       padding: 8px 18px;
-      border: 1px solid rgba(255, 255, 255, 0.35);
+      border: none;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.12);
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
       color: #fff;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.15s ease, border-color 0.15s ease;
+      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+      transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
     }
     .header-subscribe-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.5);
+      background: linear-gradient(135deg, #f87171 0%, #b91c1c 100%);
+      box-shadow: 0 6px 18px rgba(220, 38, 38, 0.45);
+      transform: translateY(-1px);
     }
     .subscribe-panel[hidden] {
       display: none;
@@ -308,19 +321,48 @@
     .subscribe-btn {
       display: inline-block;
       padding: 12px 28px;
-      border: 0;
+      border: none;
       border-radius: 999px;
-      background: linear-gradient(135deg, #1d4ed8 0%, #1e3a5f 100%);
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
       color: #fff;
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35);
+      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     .subscribe-btn:hover {
+      background: linear-gradient(135deg, #f87171 0%, #b91c1c 100%);
       transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(29, 78, 216, 0.4);
+      box-shadow: 0 6px 18px rgba(220, 38, 38, 0.45);
+    }
+    .subscribe-panel .subscribe-hint {
+      margin: -8px auto 16px;
+      font-size: 13px;
+      color: #64748b;
+      max-width: 420px;
+    }
+    .subscribe-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+    }
+    .subscribe-btn-secondary {
+      display: inline-block;
+      padding: 12px 22px;
+      border: 1px solid #dc2626;
+      border-radius: 999px;
+      background: transparent;
+      color: #dc2626;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .subscribe-btn-secondary:hover {
+      background: #fef2f2;
     }
     .subscribe-modal {
       position: fixed;
@@ -417,6 +459,16 @@
       color: #94a3b8;
     }
     .footer a { color: #64748b; }
+    .footer-link-btn {
+      padding: 0;
+      border: none;
+      background: none;
+      color: #64748b;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .footer-link-btn:hover { color: #475569; }
     @media (max-width: 600px) {
       .story { flex-direction: column; }
       .story img { width: 100%; height: 160px; }
@@ -431,10 +483,8 @@
         <p class="eyebrow">Tickr Digest</p>
         <h1>Your markets, twice a day</h1>
         {% if fetched_at_label %}
-        <p class="muted">News fetched at {{ fetched_at_label }}</p>
+        <p class="muted">{{ fetched_at_label }}</p>
         {% endif %}
-        <p>{{ date_label }} · {{ ticker_count }} tickers · {{ story_count }} stories</p>
-        <p class="muted">{{ market_summary.gainers }} up · {{ market_summary.losers }} down · {{ market_summary.flat }} flat</p>
         {% if top_mover_label %}
         <p class="badge">Today's biggest move: <strong>{{ top_mover_label }}</strong></p>
         {% endif %}
@@ -442,8 +492,8 @@
           {% if is_archive and site_url %}
           <a href="{{ site_url }}/">Latest digest</a>
           {% endif %}
-          <a href="#archives">Past editions</a>
           {% if subscribe_form_url %}
+          <button type="button" class="header-nav-link" onclick="openSubscribeModal()">Update tickers</button>
           <button type="button" class="header-subscribe-btn" onclick="openSubscribeModal()">Subscribe</button>
           {% endif %}
         </nav>
@@ -464,6 +514,11 @@
         <div class="subscribe-cta" id="subscribe-cta">
           <h2>Get Tickr in your inbox</h2>
           <p>Choose your stocks. We'll send headlines and price moves at 9:00 AM and 8:30 PM IST — only for the tickers you pick.</p>
+          <p class="subscribe-hint">Already subscribed? Enter the same email and pick new tickers to update your digest.</p>
+          <div class="subscribe-actions">
+            <button type="button" class="subscribe-btn" onclick="openSubscribeModal()">Send me the digest</button>
+            <button type="button" class="subscribe-btn-secondary" onclick="openSubscribeModal()">Update your tickers</button>
+          </div>
         </div>
       </section>
       {% endif %}
@@ -556,24 +611,11 @@
         {% endfor %}
       </div>
 
-      <details class="archives-panel" id="archives">
-        <summary>Past editions{% if archives %} ({{ archives|length }}){% endif %}</summary>
-        {% if archives %}
-        <ul class="archive-list">
-          {% for entry in archives %}
-          <li>
-            <a href="{{ archive_href_prefix }}{{ entry.filename }}">{{ entry.label }}</a>
-          </li>
-          {% endfor %}
-        </ul>
-        {% else %}
-        <p class="archives-empty">No past editions yet — check back after the next run.</p>
-        {% endif %}
-      </details>
-
       <footer class="footer">
         <p>Tickr Digest · your personalized stock brief</p>
-        <p><a href="#archives">Past editions</a></p>
+        {% if subscribe_form_url %}
+        <p><button type="button" class="footer-link-btn" onclick="openSubscribeModal()">Update your tickers</button></p>
+        {% endif %}
       </footer>
     </div>
   </div>
@@ -582,7 +624,7 @@
     <div class="subscribe-modal-backdrop" onclick="closeSubscribeModal()"></div>
     <div class="subscribe-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title">
       <div class="subscribe-modal-header">
-        <h2 id="subscribe-modal-title">Subscribe to Tickr Digest</h2>
+        <h2 id="subscribe-modal-title">Subscribe or update your tickers</h2>
         <button type="button" class="subscribe-modal-close" onclick="closeSubscribeModal()" aria-label="Close">&times;</button>
       </div>
       <div class="subscribe-modal-body" id="subscribe-modal-body">
@@ -594,7 +636,7 @@
       </div>
       <div class="subscribe-success" id="subscribe-success" hidden>
         <h3>You're in!</h3>
-        <p>Confirm your email, then pick up to 10 tickers on the form.</p>
+        <p>Confirm your email if needed. Your ticker picks apply on the next digest run.</p>
       </div>
     </div>
   </div>
@@ -683,6 +725,16 @@
           closeSubscribeModal();
         }
       });
+
+      function openFromHash() {
+        var hash = (window.location.hash || "").toLowerCase();
+        if (hash === "#subscribe" || hash === "#update-tickers") {
+          openSubscribeModal();
+        }
+      }
+
+      openFromHash();
+      window.addEventListener("hashchange", openFromHash);
     })();
   </script>
   {% endif %}

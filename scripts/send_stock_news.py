@@ -194,20 +194,44 @@ def story_dedupe_key(item: dict) -> str:
     return item.get("url", "").strip().lower()
 
 
+def unix_to_local(unix_ts: int | float) -> datetime:
+    return datetime.fromtimestamp(unix_ts, tz=timezone.utc).astimezone()
+
+
+def local_timezone_label(dt: datetime) -> str:
+    return (dt.strftime("%Z") or dt.tzname() or "").strip()
+
+
+def format_local_time_label(dt: datetime) -> str:
+    local = dt.astimezone()
+    tz = local_timezone_label(local)
+    time_label = local.strftime("%H:%M")
+    return f"{time_label} {tz}".strip() if tz else time_label
+
+
+def format_local_datetime_label(dt: datetime) -> str:
+    local = dt.astimezone()
+    tz = local_timezone_label(local)
+    base = local.strftime("%d %b %Y, %H:%M")
+    return f"{base} {tz}".strip() if tz else base
+
+
 def format_full_datetime(unix_ts: int | float | None) -> str:
     if not unix_ts:
         return ""
-    published = datetime.fromtimestamp(unix_ts, tz=timezone.utc)
+    published = unix_to_local(unix_ts)
     hour = published.hour % 12 or 12
     ampm = "AM" if published.hour < 12 else "PM"
-    return f"{published.day} {published.strftime('%b %Y')}, {hour}:{published.strftime('%M')} {ampm} UTC"
+    tz = local_timezone_label(published)
+    base = f"{published.day} {published.strftime('%b %Y')}, {hour}:{published.strftime('%M')} {ampm}"
+    return f"{base} {tz}".strip() if tz else base
 
 
 def format_relative_time(unix_ts: int | float | None) -> str:
     if not unix_ts:
         return ""
-    published = datetime.fromtimestamp(unix_ts, tz=timezone.utc)
-    now = datetime.now(timezone.utc)
+    published = unix_to_local(unix_ts)
+    now = datetime.now().astimezone()
     delta = now - published
     minutes = int(delta.total_seconds() // 60)
     if minutes < 60:
@@ -381,6 +405,7 @@ def footer_text(ticker_count: int, story_count: int) -> str:
     line = f"{ticker_count} tickers · {story_count} stories · stock-news-bot"
     if SITE_URL:
         line += f"\nRead full digest: {SITE_URL}/"
+        line += f"\nUpdate your tickers: {SITE_URL}/#update-tickers"
     return line
 
 
@@ -673,7 +698,8 @@ def build_web_digest(
 def parse_archive_filename(path: Path) -> datetime | None:
     stem = path.stem
     try:
-        return datetime.strptime(stem, "%Y-%m-%d-%H%M").replace(tzinfo=timezone.utc)
+        utc_dt = datetime.strptime(stem, "%Y-%m-%d-%H%M").replace(tzinfo=timezone.utc)
+        return utc_dt.astimezone()
     except ValueError:
         return None
 
@@ -692,7 +718,7 @@ def list_archives() -> list[dict]:
         archives.append(
             {
                 "filename": path.name,
-                "label": generated_at.strftime("%d %b %Y, %H:%M UTC"),
+                "label": format_local_datetime_label(generated_at),
                 "generated_at": generated_at,
             }
         )
@@ -708,9 +734,10 @@ def build_archive_index(archives: list[dict]) -> str:
 
 
 def write_web_pages(sections: list[dict], tickers: list[str]) -> None:
-    generated_at = datetime.now(timezone.utc)
-    archive_slug = generated_at.strftime("%Y-%m-%d-%H%M")
-    fetched_at_label = generated_at.strftime("%d %b %Y, %H:%M UTC")
+    generated_at_utc = datetime.now(timezone.utc)
+    generated_at_local = generated_at_utc.astimezone()
+    archive_slug = generated_at_utc.strftime("%Y-%m-%d-%H%M")
+    fetched_at_label = format_local_time_label(generated_at_local)
 
     html = build_web_digest(sections, tickers, fetched_at_label=fetched_at_label)
     archive_html = build_web_digest(

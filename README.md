@@ -74,7 +74,9 @@ Visitors subscribe from the web digest via a Brevo embedded form and pick ticker
 
 The bot accepts `TICKERS` as a Brevo multiple-choice list (e.g. `["AAPL", "MSFT"]`) or legacy comma-separated text.
 
-Subscribers can re-submit the same form to update their tickers (Brevo upserts the attribute).
+Subscribers can re-submit the same form with the same email to update their tickers (Brevo upserts the attribute). Changes apply on the next workflow run.
+
+**On the web digest:** use **Subscribe**, **Update your tickers**, or **Update tickers** in the header — they all open the same Brevo form. Email digests link to `/#update-tickers`, which opens the form automatically.
 
 ### Limits
 

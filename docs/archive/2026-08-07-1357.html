@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tickr Digest — 07 Aug 2026</title>
+  <title>Tickr Digest — 07 Aug 2026 (Archive)</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -62,17 +62,6 @@
     }
     .nav a { color: #93c5fd; text-decoration: none; }
     .nav a:hover { text-decoration: underline; }
-    .header-nav-link {
-      padding: 0;
-      border: none;
-      background: none;
-      color: #93c5fd;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .header-nav-link:hover { text-decoration: underline; }
     .header-subscribe-btn {
       padding: 8px 18px;
       border: none;
@@ -321,48 +310,19 @@
     .subscribe-btn {
       display: inline-block;
       padding: 12px 28px;
-      border: none;
+      border: 0;
       border-radius: 999px;
-      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      background: linear-gradient(135deg, #1d4ed8 0%, #1e3a5f 100%);
       color: #fff;
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+      box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35);
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     .subscribe-btn:hover {
-      background: linear-gradient(135deg, #f87171 0%, #b91c1c 100%);
       transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(220, 38, 38, 0.45);
-    }
-    .subscribe-panel .subscribe-hint {
-      margin: -8px auto 16px;
-      font-size: 13px;
-      color: #64748b;
-      max-width: 420px;
-    }
-    .subscribe-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      align-items: center;
-    }
-    .subscribe-btn-secondary {
-      display: inline-block;
-      padding: 12px 22px;
-      border: 1px solid #dc2626;
-      border-radius: 999px;
-      background: transparent;
-      color: #dc2626;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s ease, color 0.15s ease;
-    }
-    .subscribe-btn-secondary:hover {
-      background: #fef2f2;
+      box-shadow: 0 6px 18px rgba(29, 78, 216, 0.4);
     }
     .subscribe-modal {
       position: fixed;
@@ -459,16 +419,6 @@
       color: #94a3b8;
     }
     .footer a { color: #64748b; }
-    .footer-link-btn {
-      padding: 0;
-      border: none;
-      background: none;
-      color: #64748b;
-      font-size: 12px;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-    .footer-link-btn:hover { color: #475569; }
     @media (max-width: 600px) {
       .story { flex-direction: column; }
       .story img { width: 100%; height: 160px; }
@@ -483,15 +433,14 @@
         <p class="eyebrow">Tickr Digest</p>
         <h1>Your markets, twice a day</h1>
         
-        <p class="muted">19:42 IST</p>
+        <p class="muted">19:27 IST</p>
         
         
-        <p class="badge">Today's biggest move: <strong>IAU +2.22%</strong></p>
+        <p class="badge">Today's biggest move: <strong>IAU +2.33%</strong></p>
         
         <nav class="nav">
           
           
-          <button type="button" class="header-nav-link" onclick="openSubscribeModal()">Update tickers</button>
           <button type="button" class="header-subscribe-btn" onclick="openSubscribeModal()">Subscribe</button>
           
         </nav>
@@ -501,39 +450,39 @@
       <div class="movers">
         
         <span class="pill up">
-          IAU +2.2%
+          IAU +2.3%
         </span>
         
         <span class="pill up">
-          TSLA +1.6%
-        </span>
-        
-        <span class="pill up">
-          NVDA +1.4%
+          TSLA +2.3%
         </span>
         
         <span class="pill down">
-          CBRS -1.4%
+          CBRS -1.9%
         </span>
         
         <span class="pill up">
-          AMZN +1.1%
+          AMZN +1.7%
         </span>
         
         <span class="pill up">
-          MSFT +0.5%
+          NVDA +1.6%
+        </span>
+        
+        <span class="pill up">
+          MSFT +0.7%
+        </span>
+        
+        <span class="pill up">
+          NFLX +0.4%
         </span>
         
         <span class="pill down">
-          GOOGL -0.4%
+          GOOGL -0.3%
         </span>
         
         <span class="pill up">
           VOO +0.3%
-        </span>
-        
-        <span class="pill up">
-          NFLX +0.3%
         </span>
         
         <span class="pill up">
@@ -548,11 +497,6 @@
         <div class="subscribe-cta" id="subscribe-cta">
           <h2>Get Tickr in your inbox</h2>
           <p>Choose your stocks. We'll send headlines and price moves at 9:00 AM and 8:30 PM IST — only for the tickers you pick.</p>
-          <p class="subscribe-hint">Already subscribed? Enter the same email and pick new tickers to update your digest.</p>
-          <div class="subscribe-actions">
-            <button type="button" class="subscribe-btn" onclick="openSubscribeModal()">Send me the digest</button>
-            <button type="button" class="subscribe-btn-secondary" onclick="openSubscribeModal()">Update your tickers</button>
-          </div>
         </div>
       </section>
       
@@ -578,10 +522,10 @@
               <span class="ticker-name">IAU</span>
               
               
-              <span class="price">$81.64</span>
+              <span class="price">$81.73</span>
               
               <span class="change up">
-                +2.22%
+                +2.33%
               </span>
               
               
@@ -802,10 +746,10 @@
               <span class="mover-badge">Mover</span>
               
               
-              <span class="price">$324.73</span>
+              <span class="price">$326.91</span>
               
               <span class="change up">
-                +1.63%
+                +2.31%
               </span>
               
               
@@ -994,18 +938,251 @@
           
           <div class="ticker-header">
             
+            <img class="logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/CBRS.png" alt="CBRS">
+            
+            <div>
+              <span class="ticker-name">CBRS</span>
+              
+              <span class="mover-badge">Mover</span>
+              
+              
+              <span class="price">$207.36</span>
+              
+              <span class="change down">
+                -1.86%
+              </span>
+              
+              
+            </div>
+          </div>
+
+          
+          <p class="empty">No major news for CBRS today.</p>
+          
+        </section>
+        
+        
+        
+        
+        
+        <section class="ticker-section">
+          
+          <div class="ticker-header">
+            
+            <img class="logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AMZN.png" alt="AMZN">
+            
+            <div>
+              <span class="ticker-name">AMZN</span>
+              
+              
+              <span class="price">$276.94</span>
+              
+              <span class="change up">
+                +1.72%
+              </span>
+              
+              
+            </div>
+          </div>
+
+          
+          
+          <div class="story-list">
+            
+            
+        <article class="story">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=2f997011994a30ca69a2f8f4716b927c5b379be401f28dff110f3f168d2b6099" target="_blank" rel="noopener">Amazon CEO Andy Jassy Just Made a Shocking Trillion-Dollar Prediction</a></h3>
+            
+            <p class="summary">The company&#39;s cloud computing business could lead Amazon to new heights.</p>
+            
+            <p class="meta">
+              Yahoo
+               · 7 Aug 2026, 4:35 PM IST
+            </p>
+          </div>
+        </article>
+        
+            
+            
+        <article class="story">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=0c120d2af266f336db626816675dcc8f6df59b6ad0ebad6a92485b7085786a26" target="_blank" rel="noopener">Cloudflare shares jump after forecast raise on AI-driven demand</a></h3>
+            
+            <p class="summary">Cloudflare shares rose before the bell on Friday after the cloud services firm raised its annual ‌forecasts, betting that resilient AI-driven demand will sustain traffic across ‌its network.  Quarterly results of Cloudflare, whose shares were last up 16.2% at $330.51, follow ​Amazon.com&#39;s strongest cloud growth in more than four years.  Cloudflare now expects full-year revenue of $2.86 billion to $2.87 billion, up from its prior expectation of $2.805 billion to $2.813 ⁠billion.</p>
+            
+            <p class="meta">
+              Yahoo
+               · 7 Aug 2026, 4:24 PM IST
+            </p>
+          </div>
+        </article>
+        
+            
+            
+        <article class="story">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=1b7221e0dd94f8062dba63201381fd4dc40e13af17bccf05ee5bf0aeea06f32f" target="_blank" rel="noopener">Big Tech Stocks Storm Back as AI Fears Fade and Euphoria Resumes</a></h3>
+            
+            <p class="summary">(Bloomberg) -- After spending much of the year in the stock market doghouse over fears about their profligate spending on artificial intelligence, the world’s biggest technology companies are suddenly leading the way once again. Most Read from BloombergOpenAI’s New Device Will Be Hockey Puck-Sized and Cost Over $300Iran Wants to Bar US, Israeli Ships From Hormuz in Peace AccordIran Says Agreement on Hormuz Shipping Reached With OmanTrump Administration Considers Order on Autism and VaccinesIshbi</p>
+            
+            <p class="meta">
+              Yahoo
+               · 7 Aug 2026, 4:00 PM IST
+            </p>
+          </div>
+        </article>
+        
+            
+            
+            <details class="story-more">
+              <summary>See 7 more stories</summary>
+              
+              
+        <article class="story">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=be6ebee1012596c1066655425cd2a9f325df8b04f737376e6952d1fb5fc91022" target="_blank" rel="noopener">Why Amazon Stock Jumped 14% in July While the Market Was Flat</a></h3>
+            
+            <p class="summary">Amazon&#39;s cloud services business grew revenue by 37% in the quarter and increased operating income by a whopping 63%.</p>
+            
+            <p class="meta">
+              Yahoo
+               · 7 Aug 2026, 3:50 PM IST
+            </p>
+          </div>
+        </article>
+        
+              
+              
+        <article class="story">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=28901c1286a03d569a4a65fefb832eeedb2b84ccdae084af064a8743efa656cb" target="_blank" rel="noopener">Big Tech is borrowing its way through the AI boom: Chart of the Day</a></h3>
+            
+            <p class="summary">Alphabet is borrowing at a historic pace — and it isn&#39;t alone.</p>
+            
+            <p class="meta">
+              Yahoo
+               · 7 Aug 2026, 3:30 PM IST
+            </p>
+          </div>
+        </article>
+        
+              
+              
+        <article class="story">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=c6e47cf7f7cfbde61b8e0078877c32146c6b8f3cfdc026c4a9ce571b12569e9b" target="_blank" rel="noopener">AI Debt Indigestion Forces Wall Street to Rethink Bond Sales</a></h3>
+            
+            <p class="summary">(Bloomberg) -- When BlackRock Inc. sought to raise billions in debt financing for a Meta Platforms Inc. data center, there was one type of investor the asset management giant wanted to avoid: those looking for a quick profit.Most Read from BloombergOpenAI’s New Device Will Be Hockey Puck-Sized and Cost Over $300Iran Wants to Bar US, Israeli Ships From Hormuz in Peace AccordIran Says Agreement on Hormuz Shipping Reached With OmanTrump Administration Considers Order on Autism and VaccinesIshbia’s</p>
+            
+            <p class="meta">
+              Yahoo
+               · 7 Aug 2026, 3:30 PM IST
+            </p>
+          </div>
+        </article>
+        
+              
+              
+        <article class="story">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=a25c345a2bf581d92f29fbaf7cd5d7a98754e33684e5a86739134b34e9233be1" target="_blank" rel="noopener">Amazon CEO Andy Jassy Just Gave Investors 220 Billion Reasons to Buy Micron Stock</a></h3>
+            
+            <p class="summary">Amazon just raised its artificial intelligence (AI) budget to $220 billion, up from a prior estimate of $200 billion.</p>
+            
+            <p class="meta">
+              Yahoo
+               · 7 Aug 2026, 2:50 PM IST
+            </p>
+          </div>
+        </article>
+        
+              
+              
+        <article class="story">
+          
+          <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2254781681/image_2254781681.jpg?io=getty-c-w1536" alt="">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=b6c0e20f791a8fefc10daa30a579f9ab3f7bd0a51b036b3374ac42872bcb74a4" target="_blank" rel="noopener">AMD: Buy The Dip - Market Is Mispricing Its Supply Leverage</a></h3>
+            
+            <p class="summary">Advanced Micro Devices, Inc. beat Q2 earnings &amp; raised targets as data center momentum accelerates. Find out why AMD stock is a buy.</p>
+            
+            <p class="meta">
+              SeekingAlpha
+               · 7 Aug 2026, 2:45 PM IST
+            </p>
+          </div>
+        </article>
+        
+              
+              
+        <article class="story">
+          
+          <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2176126263/image_2176126263.jpg?io=getty-c-w1536" alt="">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=93292c2d9b8343baad78a4f00cc37e046836c2e1a4c4e4920b510659245710a8" target="_blank" rel="noopener">Walmart: I Expect Solid Earnings But Valuation Keeps Me At Hold</a></h3>
+            
+            <p class="summary">Walmart (WMT) is a well-managed, value-focused retailer, but its ~40x PE ratio is excessive for the sector.</p>
+            
+            <p class="meta">
+              SeekingAlpha
+               · 7 Aug 2026, 2:21 PM IST
+            </p>
+          </div>
+        </article>
+        
+              
+              
+        <article class="story">
+          
+          <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2175391938/image_2175391938.jpg?io=getty-c-w1536" alt="">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=e92b3c3049aa25a811dd47df646c220eb681f8b3be5447c48c2834f347f6386d" target="_blank" rel="noopener">Amazon: Stronger AWS Growth Meets A Much Heavier Investment Cycle</a></h3>
+            
+            <p class="summary">Amazon&#39;s AWS reaccelerated to 37% revenue growth and 39.4% margin, driving 61% of Q2 operating income. Learn why AMZN stock is a buy.</p>
+            
+            <p class="meta">
+              SeekingAlpha
+               · 7 Aug 2026, 11:31 AM IST
+            </p>
+          </div>
+        </article>
+        
+              
+            </details>
+            
+          </div>
+          
+        </section>
+        
+        
+        
+        
+        
+        <section class="ticker-section">
+          
+          <div class="ticker-header">
+            
             <img class="logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/NVDA.png" alt="NVDA">
             
             <div>
               <span class="ticker-name">NVDA</span>
               
-              <span class="mover-badge">Mover</span>
               
-              
-              <span class="price">$222.14</span>
+              <span class="price">$222.43</span>
               
               <span class="change up">
-                +1.44%
+                +1.57%
               </span>
               
               
@@ -1194,243 +1371,16 @@
           
           <div class="ticker-header">
             
-            <img class="logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/CBRS.png" alt="CBRS">
-            
-            <div>
-              <span class="ticker-name">CBRS</span>
-              
-              
-              <span class="price">$208.36</span>
-              
-              <span class="change down">
-                -1.39%
-              </span>
-              
-              
-            </div>
-          </div>
-
-          
-          <p class="empty">No major news for CBRS today.</p>
-          
-        </section>
-        
-        
-        
-        
-        
-        <section class="ticker-section">
-          
-          <div class="ticker-header">
-            
-            <img class="logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AMZN.png" alt="AMZN">
-            
-            <div>
-              <span class="ticker-name">AMZN</span>
-              
-              
-              <span class="price">$275.38</span>
-              
-              <span class="change up">
-                +1.15%
-              </span>
-              
-              
-            </div>
-          </div>
-
-          
-          
-          <div class="story-list">
-            
-            
-        <article class="story">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=de8a0c6e7528c605679f714dfb5ae73fd5df6ceddfe17c24db932549b8437233" target="_blank" rel="noopener">Stock Market Today: Dow Down After Surprise July Jobs Reading; AI Stock Cloudflare Soars (Live Coverage)</a></h3>
-            
-            <p class="summary">Stock Market Today: The Dow Jones index falls Friday on a surprise reading in the July jobs report. AI name Cloudflare stock soars on earnings.</p>
-            
-            <p class="meta">
-              Yahoo
-               · 7 Aug 2026, 7:25 PM IST
-            </p>
-          </div>
-        </article>
-        
-            
-            
-        <article class="story">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=4929b051a5fc77de30dee4a55524465dacec0c18fe2e853ceb51a299bfe6bf22" target="_blank" rel="noopener">Market Chatter: Amazon&#39;s AWS Engineers Face Longer Waits for CPU Servers Amid Capacity Tightening</a></h3>
-            
-            <p class="summary">Amazon&#39;s (AMZN) Amazon Web Services has asked engineers to reduce internal compute usage and free up</p>
-            
-            <p class="meta">
-              Yahoo
-               · 7 Aug 2026, 7:14 PM IST
-            </p>
-          </div>
-        </article>
-        
-            
-            
-        <article class="story">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=0e41d834879a0544c3539a2f87449a513cd03b7b28384759988db045686169e0" target="_blank" rel="noopener">Prediction: After a Blowout Quarter, Shopify Will End The Year at This Price</a></h3>
-            
-            <p class="summary">Shopify just posted its biggest single-day earnings pop in recent memory, and the rally may not be finished. Here is where the stock could land before December and what threatens to knock it off course.</p>
-            
-            <p class="meta">
-              Yahoo
-               · 7 Aug 2026, 7:00 PM IST
-            </p>
-          </div>
-        </article>
-        
-            
-            
-            <details class="story-more">
-              <summary>See 7 more stories</summary>
-              
-              
-        <article class="story">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=2f997011994a30ca69a2f8f4716b927c5b379be401f28dff110f3f168d2b6099" target="_blank" rel="noopener">Amazon CEO Andy Jassy Just Made a Shocking Trillion-Dollar Prediction</a></h3>
-            
-            <p class="summary">The company&#39;s cloud computing business could lead Amazon to new heights.</p>
-            
-            <p class="meta">
-              Yahoo
-               · 7 Aug 2026, 4:35 PM IST
-            </p>
-          </div>
-        </article>
-        
-              
-              
-        <article class="story">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=0c120d2af266f336db626816675dcc8f6df59b6ad0ebad6a92485b7085786a26" target="_blank" rel="noopener">Cloudflare shares jump after forecast raise on AI-driven demand</a></h3>
-            
-            <p class="summary">Cloudflare shares rose before the bell on Friday after the cloud services firm raised its annual ‌forecasts, betting that resilient AI-driven demand will sustain traffic across ‌its network.  Quarterly results of Cloudflare, whose shares were last up 16.2% at $330.51, follow ​Amazon.com&#39;s strongest cloud growth in more than four years.  Cloudflare now expects full-year revenue of $2.86 billion to $2.87 billion, up from its prior expectation of $2.805 billion to $2.813 ⁠billion.</p>
-            
-            <p class="meta">
-              Yahoo
-               · 7 Aug 2026, 4:24 PM IST
-            </p>
-          </div>
-        </article>
-        
-              
-              
-        <article class="story">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=1b7221e0dd94f8062dba63201381fd4dc40e13af17bccf05ee5bf0aeea06f32f" target="_blank" rel="noopener">Big Tech Stocks Storm Back as AI Fears Fade and Euphoria Resumes</a></h3>
-            
-            <p class="summary">(Bloomberg) -- After spending much of the year in the stock market doghouse over fears about their profligate spending on artificial intelligence, the world’s biggest technology companies are suddenly leading the way once again. Most Read from BloombergOpenAI’s New Device Will Be Hockey Puck-Sized and Cost Over $300Iran Wants to Bar US, Israeli Ships From Hormuz in Peace AccordIran Says Agreement on Hormuz Shipping Reached With OmanTrump Administration Considers Order on Autism and VaccinesIshbi</p>
-            
-            <p class="meta">
-              Yahoo
-               · 7 Aug 2026, 4:00 PM IST
-            </p>
-          </div>
-        </article>
-        
-              
-              
-        <article class="story">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=be6ebee1012596c1066655425cd2a9f325df8b04f737376e6952d1fb5fc91022" target="_blank" rel="noopener">Why Amazon Stock Jumped 14% in July While the Market Was Flat</a></h3>
-            
-            <p class="summary">Amazon&#39;s cloud services business grew revenue by 37% in the quarter and increased operating income by a whopping 63%.</p>
-            
-            <p class="meta">
-              Yahoo
-               · 7 Aug 2026, 3:50 PM IST
-            </p>
-          </div>
-        </article>
-        
-              
-              
-        <article class="story">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=28901c1286a03d569a4a65fefb832eeedb2b84ccdae084af064a8743efa656cb" target="_blank" rel="noopener">Big Tech is borrowing its way through the AI boom: Chart of the Day</a></h3>
-            
-            <p class="summary">Alphabet is borrowing at a historic pace — and it isn&#39;t alone.</p>
-            
-            <p class="meta">
-              Yahoo
-               · 7 Aug 2026, 3:30 PM IST
-            </p>
-          </div>
-        </article>
-        
-              
-              
-        <article class="story">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=c6e47cf7f7cfbde61b8e0078877c32146c6b8f3cfdc026c4a9ce571b12569e9b" target="_blank" rel="noopener">AI Debt Indigestion Forces Wall Street to Rethink Bond Sales</a></h3>
-            
-            <p class="summary">(Bloomberg) -- When BlackRock Inc. sought to raise billions in debt financing for a Meta Platforms Inc. data center, there was one type of investor the asset management giant wanted to avoid: those looking for a quick profit.Most Read from BloombergOpenAI’s New Device Will Be Hockey Puck-Sized and Cost Over $300Iran Wants to Bar US, Israeli Ships From Hormuz in Peace AccordIran Says Agreement on Hormuz Shipping Reached With OmanTrump Administration Considers Order on Autism and VaccinesIshbia’s</p>
-            
-            <p class="meta">
-              Yahoo
-               · 7 Aug 2026, 3:30 PM IST
-            </p>
-          </div>
-        </article>
-        
-              
-              
-        <article class="story">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=a25c345a2bf581d92f29fbaf7cd5d7a98754e33684e5a86739134b34e9233be1" target="_blank" rel="noopener">Amazon CEO Andy Jassy Just Gave Investors 220 Billion Reasons to Buy Micron Stock</a></h3>
-            
-            <p class="summary">Amazon just raised its artificial intelligence (AI) budget to $220 billion, up from a prior estimate of $200 billion.</p>
-            
-            <p class="meta">
-              Yahoo
-               · 7 Aug 2026, 2:50 PM IST
-            </p>
-          </div>
-        </article>
-        
-              
-            </details>
-            
-          </div>
-          
-        </section>
-        
-        
-        
-        
-        
-        <section class="ticker-section">
-          
-          <div class="ticker-header">
-            
             <img class="logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/MSFT.png" alt="MSFT">
             
             <div>
               <span class="ticker-name">MSFT</span>
               
               
-              <span class="price">$502.34</span>
+              <span class="price">$503.12</span>
               
               <span class="change up">
-                +0.50%
+                +0.65%
               </span>
               
               
@@ -1623,16 +1573,218 @@
           
           <div class="ticker-header">
             
+            <img class="logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/NFLX.png" alt="NFLX">
+            
+            <div>
+              <span class="ticker-name">NFLX</span>
+              
+              
+              <span class="price">$73.99</span>
+              
+              <span class="change up">
+                +0.41%
+              </span>
+              
+              
+            </div>
+          </div>
+
+          
+          
+          <div class="story-list">
+            
+            
+        <article class="story">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=2945eb85c1e40404144388fc3922030d51c77e43655bc7b09bbaaf7c2d056057" target="_blank" rel="noopener">Netflix (NFLX) Stock May Be 26% Undervalued Despite New Franchise Rights</a></h3>
+            
+            <p class="summary">Netflix stock has had a strong run over the past three years, yet current checks still point to a discount, with both its Discounted Cash Flow (DCF) intrinsic value estimate and market multiples indicating the shares may be pricing in less than the modelled cash flows. Over the past 3 years, Netflix has returned about 71%, which puts the recent share price weakness into context as a pullback after a longer period of gains. The multi year licensing deal for The Walking Dead Universe can...</p>
+            
+            <p class="meta">
+              Yahoo
+               · 7 Aug 2026, 4:45 AM IST
+            </p>
+          </div>
+        </article>
+        
+            
+            
+        <article class="story">
+          
+          <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1318776826/image_1318776826.jpg?io=getty-c-w1536" alt="">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=e4e14ccbf7af0c8c6ec733507d7d7966d1ad1045f756c55ff393f45f475b8901" target="_blank" rel="noopener">Tracking Baillie Gifford&#39;s 13F Portfolio - Q2 2026 Update</a></h3>
+            
+            <p class="summary">Baillie Gifford Q2 2026 13F: portfolio grew to $110B; SpaceX IPO (SPCX) tops holdings, NVDA added, AMZN trimmed. Read more analysis here.</p>
+            
+            <p class="meta">
+              SeekingAlpha
+               · 7 Aug 2026, 2:24 AM IST
+            </p>
+          </div>
+        </article>
+        
+            
+            
+        <article class="story">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=f9907a90a06861680bca96cac6f7aca091431a640b669e86e7e875c62a0b81d0" target="_blank" rel="noopener">Get Paid 10% To Cap Your DIS Stock At 8.1% Higher</a></h3>
+            
+            <p class="summary">For Walt Disney shareholders, here is a way to get paid a meaningful income now, money you keep no matter what, in exchange for agreeing to sell your stock at a higher price if it gets there.</p>
+            
+            <p class="meta">
+              Yahoo
+               · 7 Aug 2026, 2:16 AM IST
+            </p>
+          </div>
+        </article>
+        
+            
+            
+            <details class="story-more">
+              <summary>See 7 more stories</summary>
+              
+              
+        <article class="story">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=0568cc498d4de1f6bef96f4b3f764b6fa3c12b2457c9f71ffc2c2662f497dcfa" target="_blank" rel="noopener">Netflix&#39;s Latest Insider Sale Looks Bigger Than It Is</a></h3>
+            
+            <p class="summary">A director plans to sell 2,160 shares under a previously arranged trading plan.</p>
+            
+            <p class="meta">
+              Yahoo
+               · 7 Aug 2026, 1:25 AM IST
+            </p>
+          </div>
+        </article>
+        
+              
+              
+        <article class="story">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=92ef598f1f84b5c487d1279b09d191167e24a1d49d1d288ff760ba12d8116708" target="_blank" rel="noopener">PancakeSwap Expands Tokenized Equity Offerings with 10 New &#39;bStocks&#39; on BNB Chain</a></h3>
+            
+            <p class="summary">Decentralized crypto exchange PancakeSwap (CRYPTO: $CAKE) expanded its tokenized equities offering on Thursday, lis...</p>
+            
+            <p class="meta">
+              Yahoo
+               · 6 Aug 2026, 11:42 PM IST
+            </p>
+          </div>
+        </article>
+        
+              
+              
+        <article class="story">
+          
+          <img src="https://www.chartmill.com/images/uploads/CM_Most_Active_Stocks_Small_free_fec0650b7f.webp" alt="">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=1baa164f5b5a34580123a837cb4c226634687b4219d9917685e1740b006dfa56" target="_blank" rel="noopener">Curious about the most active S&amp;P500 stocks in today&#39;s session?</a></h3>
+            
+            <p class="summary">Let&#39;s have a look at what is happening on the US markets on Thursday. Below you can find the most active S&amp;P500 stocks in today&#39;s session.</p>
+            
+            <p class="meta">
+              ChartMill
+               · 6 Aug 2026, 11:35 PM IST
+            </p>
+          </div>
+        </article>
+        
+              
+              
+        <article class="story">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=0be1ce37a3db0f6647ffee390bf3dbc22d3a32e72c83afc079251324fea2d86e" target="_blank" rel="noopener">Netflix Killed Cable TV. Now the Streaming Giant Wants to Bring It Back.</a></h3>
+            
+            <p class="summary">Netflix spent two decades trying to convince us all that cable TV was a waste of money. Now, the company is considering taking us back in time with the launch of its new, always-on TV channels.</p>
+            
+            <p class="meta">
+              Yahoo
+               · 6 Aug 2026, 11:25 PM IST
+            </p>
+          </div>
+        </article>
+        
+              
+              
+        <article class="story">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=90ad9d19a1b87ca0e25ed1ff9ebe00a23823a1643fca14a42799ccb92b62df04" target="_blank" rel="noopener">Netflix and MercadoLibre Are Underperforming the S&amp;P 500. Here&#39;s the 1 Stock I&#39;d Buy in August.</a></h3>
+            
+            <p class="summary">I own both stocks already, but there&#39;s only one on my short list of buy candidates this month.</p>
+            
+            <p class="meta">
+              Yahoo
+               · 6 Aug 2026, 11:07 PM IST
+            </p>
+          </div>
+        </article>
+        
+              
+              
+        <article class="story">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=18c204a1aa3f18337d8e5a000316bc381b4d6b3278a5210e4e33f200841a95b2" target="_blank" rel="noopener">Netflix and Disney Are Exploring Free, Ad-Supported Tiers</a></h3>
+            
+            <p class="summary">Netflix and Disney are exploring free ad-supported streaming tiers, but expect limited content while the best shows stay locked behind a paywall.</p>
+            
+            <p class="meta">
+              Yahoo
+               · 6 Aug 2026, 10:58 PM IST
+            </p>
+          </div>
+        </article>
+        
+              
+              
+        <article class="story">
+          
+          <div class="story-body">
+            <h3><a href="https://finnhub.io/api/news?id=91cc4ad6877748990ee5c4b8647b35553a0f18d0bf803c1f56b88e51bbe76fa4" target="_blank" rel="noopener">Warner Bros. Posts Surprise Quarterly Profit Amid Streaming Gains; Paramount Deal Gets UK Clearance</a></h3>
+            
+            <p class="summary">Warner Bros. Discovery (WBD) reported a surprise second-quarter profit on Thursday amid double-digit</p>
+            
+            <p class="meta">
+              Yahoo
+               · 6 Aug 2026, 7:59 PM IST
+            </p>
+          </div>
+        </article>
+        
+              
+            </details>
+            
+          </div>
+          
+        </section>
+        
+        
+        
+        
+        
+        <section class="ticker-section">
+          
+          <div class="ticker-header">
+            
             <img class="logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/GOOG.png" alt="GOOGL">
             
             <div>
               <span class="ticker-name">GOOGL</span>
               
               
-              <span class="price">$356.30</span>
+              <span class="price">$356.55</span>
               
               <span class="change down">
-                -0.41%
+                -0.34%
               </span>
               
               
@@ -1829,10 +1981,10 @@
               <span class="ticker-name">VOO</span>
               
               
-              <span class="price">$708.48</span>
+              <span class="price">$708.76</span>
               
               <span class="change up">
-                +0.29%
+                +0.33%
               </span>
               
               
@@ -1894,24 +2046,6 @@
             
             <details class="story-more">
               <summary>See 7 more stories</summary>
-              
-              
-        <article class="story">
-          
-          <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2167705206/image_2167705206.jpg?io=getty-c-w1536" alt="">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=eaa28a443fda66e4cb7ff6781ba217f8deba7f0cc369a112cbf7f45390db627a" target="_blank" rel="noopener">Why The Weak July Jobs Report Gives Bulls A New Reason To Cheer</a></h3>
-            
-            <p class="summary">The July jobs report disappointed, with a 23,000 decline versus +80,000 expected and sharply negative revisions for prior months. Read more here.</p>
-            
-            <p class="meta">
-              SeekingAlpha
-               · 7 Aug 2026, 3:15 PM IST
-            </p>
-          </div>
-        </article>
-        
               
               
         <article class="story">
@@ -2013,203 +2147,19 @@
         </article>
         
               
-            </details>
-            
-          </div>
-          
-        </section>
-        
-        
-        
-        
-        
-        <section class="ticker-section">
-          
-          <div class="ticker-header">
-            
-            <img class="logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/NFLX.png" alt="NFLX">
-            
-            <div>
-              <span class="ticker-name">NFLX</span>
               
-              
-              <span class="price">$73.89</span>
-              
-              <span class="change up">
-                +0.27%
-              </span>
-              
-              
-            </div>
-          </div>
-
-          
-          
-          <div class="story-list">
-            
-            
         <article class="story">
           
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=2945eb85c1e40404144388fc3922030d51c77e43655bc7b09bbaaf7c2d056057" target="_blank" rel="noopener">Netflix (NFLX) Stock May Be 26% Undervalued Despite New Franchise Rights</a></h3>
-            
-            <p class="summary">Netflix stock has had a strong run over the past three years, yet current checks still point to a discount, with both its Discounted Cash Flow (DCF) intrinsic value estimate and market multiples indicating the shares may be pricing in less than the modelled cash flows. Over the past 3 years, Netflix has returned about 71%, which puts the recent share price weakness into context as a pullback after a longer period of gains. The multi year licensing deal for The Walking Dead Universe can...</p>
-            
-            <p class="meta">
-              Yahoo
-               · 7 Aug 2026, 4:45 AM IST
-            </p>
-          </div>
-        </article>
-        
-            
-            
-        <article class="story">
-          
-          <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1318776826/image_1318776826.jpg?io=getty-c-w1536" alt="">
+          <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2223715503/image_2223715503.jpg?io=getty-c-w1536" alt="">
           
           <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=e4e14ccbf7af0c8c6ec733507d7d7966d1ad1045f756c55ff393f45f475b8901" target="_blank" rel="noopener">Tracking Baillie Gifford&#39;s 13F Portfolio - Q2 2026 Update</a></h3>
+            <h3><a href="https://finnhub.io/api/news?id=f1f73534cf7e3e40d71b94d7296363b4b05826a2d9014c0ad6219c7b224551b1" target="_blank" rel="noopener">Credit Says The Capital Goods Recession Story Doesn&#39;t Hold Up</a></h3>
             
-            <p class="summary">Baillie Gifford Q2 2026 13F: portfolio grew to $110B; SpaceX IPO (SPCX) tops holdings, NVDA added, AMZN trimmed. Read more analysis here.</p>
+            <p class="summary">Every market shock produces a story fast enough to explain it, and the story that formed around Julyâs selloff was a good one</p>
             
             <p class="meta">
               SeekingAlpha
-               · 7 Aug 2026, 2:24 AM IST
-            </p>
-          </div>
-        </article>
-        
-            
-            
-        <article class="story">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=f9907a90a06861680bca96cac6f7aca091431a640b669e86e7e875c62a0b81d0" target="_blank" rel="noopener">Get Paid 10% To Cap Your DIS Stock At 8.1% Higher</a></h3>
-            
-            <p class="summary">For Walt Disney shareholders, here is a way to get paid a meaningful income now, money you keep no matter what, in exchange for agreeing to sell your stock at a higher price if it gets there.</p>
-            
-            <p class="meta">
-              Yahoo
-               · 7 Aug 2026, 2:16 AM IST
-            </p>
-          </div>
-        </article>
-        
-            
-            
-            <details class="story-more">
-              <summary>See 7 more stories</summary>
-              
-              
-        <article class="story">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=0568cc498d4de1f6bef96f4b3f764b6fa3c12b2457c9f71ffc2c2662f497dcfa" target="_blank" rel="noopener">Netflix&#39;s Latest Insider Sale Looks Bigger Than It Is</a></h3>
-            
-            <p class="summary">A director plans to sell 2,160 shares under a previously arranged trading plan.</p>
-            
-            <p class="meta">
-              Yahoo
-               · 7 Aug 2026, 1:25 AM IST
-            </p>
-          </div>
-        </article>
-        
-              
-              
-        <article class="story">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=92ef598f1f84b5c487d1279b09d191167e24a1d49d1d288ff760ba12d8116708" target="_blank" rel="noopener">PancakeSwap Expands Tokenized Equity Offerings with 10 New &#39;bStocks&#39; on BNB Chain</a></h3>
-            
-            <p class="summary">Decentralized crypto exchange PancakeSwap (CRYPTO: $CAKE) expanded its tokenized equities offering on Thursday, lis...</p>
-            
-            <p class="meta">
-              Yahoo
-               · 6 Aug 2026, 11:42 PM IST
-            </p>
-          </div>
-        </article>
-        
-              
-              
-        <article class="story">
-          
-          <img src="https://www.chartmill.com/images/uploads/CM_Most_Active_Stocks_Small_free_fec0650b7f.webp" alt="">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=1baa164f5b5a34580123a837cb4c226634687b4219d9917685e1740b006dfa56" target="_blank" rel="noopener">Curious about the most active S&amp;P500 stocks in today&#39;s session?</a></h3>
-            
-            <p class="summary">Let&#39;s have a look at what is happening on the US markets on Thursday. Below you can find the most active S&amp;P500 stocks in today&#39;s session.</p>
-            
-            <p class="meta">
-              ChartMill
-               · 6 Aug 2026, 11:35 PM IST
-            </p>
-          </div>
-        </article>
-        
-              
-              
-        <article class="story">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=0be1ce37a3db0f6647ffee390bf3dbc22d3a32e72c83afc079251324fea2d86e" target="_blank" rel="noopener">Netflix Killed Cable TV. Now the Streaming Giant Wants to Bring It Back.</a></h3>
-            
-            <p class="summary">Netflix spent two decades trying to convince us all that cable TV was a waste of money. Now, the company is considering taking us back in time with the launch of its new, always-on TV channels.</p>
-            
-            <p class="meta">
-              Yahoo
-               · 6 Aug 2026, 11:25 PM IST
-            </p>
-          </div>
-        </article>
-        
-              
-              
-        <article class="story">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=90ad9d19a1b87ca0e25ed1ff9ebe00a23823a1643fca14a42799ccb92b62df04" target="_blank" rel="noopener">Netflix and MercadoLibre Are Underperforming the S&amp;P 500. Here&#39;s the 1 Stock I&#39;d Buy in August.</a></h3>
-            
-            <p class="summary">I own both stocks already, but there&#39;s only one on my short list of buy candidates this month.</p>
-            
-            <p class="meta">
-              Yahoo
-               · 6 Aug 2026, 11:07 PM IST
-            </p>
-          </div>
-        </article>
-        
-              
-              
-        <article class="story">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=18c204a1aa3f18337d8e5a000316bc381b4d6b3278a5210e4e33f200841a95b2" target="_blank" rel="noopener">Netflix and Disney Are Exploring Free, Ad-Supported Tiers</a></h3>
-            
-            <p class="summary">Netflix and Disney are exploring free ad-supported streaming tiers, but expect limited content while the best shows stay locked behind a paywall.</p>
-            
-            <p class="meta">
-              Yahoo
-               · 6 Aug 2026, 10:58 PM IST
-            </p>
-          </div>
-        </article>
-        
-              
-              
-        <article class="story">
-          
-          <div class="story-body">
-            <h3><a href="https://finnhub.io/api/news?id=91cc4ad6877748990ee5c4b8647b35553a0f18d0bf803c1f56b88e51bbe76fa4" target="_blank" rel="noopener">Warner Bros. Posts Surprise Quarterly Profit Amid Streaming Gains; Paramount Deal Gets UK Clearance</a></h3>
-            
-            <p class="summary">Warner Bros. Discovery (WBD) reported a surprise second-quarter profit on Thursday amid double-digit</p>
-            
-            <p class="meta">
-              Yahoo
-               · 6 Aug 2026, 7:59 PM IST
+               · 7 Aug 2026, 5:50 AM IST
             </p>
           </div>
         </article>
@@ -2235,7 +2185,7 @@
               <span class="ticker-name">META</span>
               
               
-              <span class="price">$590.30</span>
+              <span class="price">$590.32</span>
               
               <span class="change up">
                 +0.07%
@@ -2426,9 +2376,6 @@
 
       <footer class="footer">
         <p>Tickr Digest · your personalized stock brief</p>
-        
-        <p><button type="button" class="footer-link-btn" onclick="openSubscribeModal()">Update your tickers</button></p>
-        
       </footer>
     </div>
   </div>
@@ -2437,7 +2384,7 @@
     <div class="subscribe-modal-backdrop" onclick="closeSubscribeModal()"></div>
     <div class="subscribe-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title">
       <div class="subscribe-modal-header">
-        <h2 id="subscribe-modal-title">Subscribe or update your tickers</h2>
+        <h2 id="subscribe-modal-title">Subscribe to Tickr Digest</h2>
         <button type="button" class="subscribe-modal-close" onclick="closeSubscribeModal()" aria-label="Close">&times;</button>
       </div>
       <div class="subscribe-modal-body" id="subscribe-modal-body">
@@ -2449,7 +2396,7 @@
       </div>
       <div class="subscribe-success" id="subscribe-success" hidden>
         <h3>You're in!</h3>
-        <p>Confirm your email if needed. Your ticker picks apply on the next digest run.</p>
+        <p>Confirm your email, then pick up to 10 tickers on the form.</p>
       </div>
     </div>
   </div>
@@ -2538,16 +2485,6 @@
           closeSubscribeModal();
         }
       });
-
-      function openFromHash() {
-        var hash = (window.location.hash || "").toLowerCase();
-        if (hash === "#subscribe" || hash === "#update-tickers") {
-          openSubscribeModal();
-        }
-      }
-
-      openFromHash();
-      window.addEventListener("hashchange", openFromHash);
     })();
   </script>
   

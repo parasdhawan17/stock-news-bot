@@ -26,6 +26,7 @@ jobs:
 
       - name: Send stock news
         env:
+          TZ: Asia/Kolkata
           FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           BREVO_LIST_ID: ${{ secrets.BREVO_LIST_ID }}

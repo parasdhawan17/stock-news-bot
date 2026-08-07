@@ -9,9 +9,9 @@ Daily US stock news digest delivered to WhatsApp, email, and a GitHub Pages web 
 1. GitHub Actions runs twice daily (9:00 AM and 8:30 PM IST) or manually via **Run workflow**.
 2. The script reads tickers from `config/tickers.json`.
 3. Finnhub fetches the last 24 hours of headlines and real-time quotes per ticker.
-4. A formatted message is sent to your WhatsApp via CallMeBot.
-5. A rich HTML email digest (with thumbnails, summaries, and price changes) is sent via Brevo.
-6. A detailed web digest is generated into `docs/` and published via GitHub Pages — top movers highlighted, 3 stories per ticker with expand for more, and in-page archive browsing.
+4. Optionally send a formatted message to WhatsApp via CallMeBot (`--whatsapp`).
+5. Optionally send a rich HTML email digest via Brevo (`--email`).
+6. A detailed web digest is always generated into `docs/` and published via GitHub Pages — top movers highlighted, 3 stories per ticker with expand for more, and in-page archive browsing.
 
 ## Project structure
 
@@ -36,7 +36,9 @@ stock-news-bot/
 1. Sign up at [finnhub.io](https://finnhub.io/).
 2. Copy your API key from the dashboard.
 
-### 2. CallMeBot WhatsApp authorization
+### 2. CallMeBot WhatsApp authorization (optional)
+
+Only needed if you pass `--whatsapp`. Skip this section if you are using email and web only.
 
 1. Save **+34 644 44 71 67** as a WhatsApp contact (e.g. "CallMeBot").
 2. Send it: `I allow callmebot to send me messages`
@@ -55,8 +57,8 @@ In your repo: **Settings → Secrets and variables → Actions → New repositor
 | Secret | Value |
 |--------|-------|
 | `FINNHUB_API_KEY` | Your Finnhub API key |
-| `WHATSAPP_PHONE` | Your number with country code, e.g. `+919876543210` |
-| `CALLMEBOT_API_KEY` | API key from CallMeBot |
+| `WHATSAPP_PHONE` | Your number with country code (only if using `--whatsapp`) |
+| `CALLMEBOT_API_KEY` | API key from CallMeBot (only if using `--whatsapp`) |
 | `BREVO_API_KEY` | API key from Brevo |
 | `EMAIL_TO` | Recipient email, e.g. `you@gmail.com` |
 | `EMAIL_FROM` | Verified sender email in Brevo |
@@ -99,13 +101,13 @@ Or add secrets in the GitHub UI: **Settings → Secrets and variables → Action
 4. Save. The site will be live at `https://<your-username>.github.io/<repo-name>/`.
 5. The web digest highlights top movers, shows 3 stories per ticker (expand for more), and includes a collapsible archives panel on the same page. Past digests are also saved at `/archive/` (each workflow run creates a new dated page).
 
-The workflow sets `SITE_URL` automatically so WhatsApp and email footers link to the web digest.
+The workflow sets `SITE_URL` automatically so email footers link to the web digest. It runs with `--email` only; add `--whatsapp` to the workflow command when you want WhatsApp delivery again.
 
 ### 7. Test
 
 1. Open **Actions** → **Daily Stock News** → **Run workflow**.
-2. Check the run logs for `Web digest written`, `WhatsApp message sent`, and `Email sent`.
-3. Confirm the WhatsApp message, HTML email, and web page on your devices.
+2. Check the run logs for `Web digest written` and `Email sent`.
+3. Confirm the HTML email and web page on your devices.
 
 ## Customize tickers
 
@@ -126,14 +128,17 @@ Copy `.env.example` to `.env` and fill in your keys, then:
 ```bash
 pip install -r requirements.txt
 set -a && source .env && set +a
-python scripts/send_stock_news.py
+python scripts/send_stock_news.py              # web digest only
+python scripts/send_stock_news.py --email      # web + email
+python scripts/send_stock_news.py --whatsapp   # web + WhatsApp
+python scripts/send_stock_news.py --all        # web + email + WhatsApp
 ```
 
 This generates `docs/index.html` locally. Open it in a browser to preview the web digest — top movers are featured first, each ticker shows 3 stories with a "see more" expander, and past digests are browsable via the archives panel at the bottom.
 
-Email is skipped if `BREVO_API_KEY`, `EMAIL_TO`, or `EMAIL_FROM` are not set.
+Email and WhatsApp are opt-in via flags. Credentials are only required for the channels you enable.
 
-Set `SITE_URL` in `.env` to include the web digest link in WhatsApp and email footers during local runs.
+Set `SITE_URL` in `.env` to include the web digest link in email and WhatsApp footers during local runs.
 
 ## Schedule
 

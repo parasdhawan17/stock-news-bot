@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Fetch daily US stock news from Finnhub and deliver via WhatsApp, email, and web."""
 
+import argparse
 import json
 import os
 import sys
@@ -688,31 +689,68 @@ def email_configured() -> bool:
     return bool(BREVO_API_KEY and EMAIL_TO and EMAIL_FROM)
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Fetch stock news and publish the web digest. Delivery channels are opt-in.",
+    )
+    parser.add_argument(
+        "--email",
+        action="store_true",
+        help="Send the HTML email digest via Brevo.",
+    )
+    parser.add_argument(
+        "--whatsapp",
+        action="store_true",
+        help="Send the WhatsApp digest via CallMeBot.",
+    )
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Send via every configured delivery channel (email and WhatsApp).",
+    )
+    return parser.parse_args()
+
+
 def main() -> None:
+    args = parse_args()
+    send_email_digest = args.email or args.all
+    send_whatsapp_digest = args.whatsapp or args.all
+
     finnhub_key = require_env("FINNHUB_API_KEY", FINNHUB_KEY)
-    phone = require_env("WHATSAPP_PHONE", WHATSAPP_PHONE)
-    callmebot_key = require_env("CALLMEBOT_API_KEY", CALLMEBOT_KEY)
 
     tickers = load_tickers()
     sections, total_stories = collect_digest_data(tickers, finnhub_key)
 
     write_web_pages(sections, tickers)
 
-    messages = build_messages(sections, tickers, total_stories)
-    total_chars = sum(len(message) for message in messages)
-    print(f"Prepared {len(messages)} messages for {len(tickers)} tickers ({total_chars} chars total)")
-    send_whatsapp_messages(messages, phone, callmebot_key)
+    if send_whatsapp_digest:
+        phone = require_env("WHATSAPP_PHONE", WHATSAPP_PHONE)
+        callmebot_key = require_env("CALLMEBOT_API_KEY", CALLMEBOT_KEY)
+        messages = build_messages(sections, tickers, total_stories)
+        total_chars = sum(len(message) for message in messages)
+        print(
+            f"Prepared {len(messages)} WhatsApp messages for {len(tickers)} tickers "
+            f"({total_chars} chars total)"
+        )
+        send_whatsapp_messages(messages, phone, callmebot_key)
+    else:
+        print("WhatsApp skipped (pass --whatsapp to enable).")
 
-    if not email_configured():
-        print("Email skipped: set BREVO_API_KEY, EMAIL_TO, and EMAIL_FROM to enable.")
-        return
-
-    try:
-        html, text = build_email_digest(sections, tickers, total_stories)
-        print(f"Prepared email ({len(html)} chars HTML, {len(text)} chars plain text)")
-        send_email(html, text, BREVO_API_KEY, EMAIL_FROM, EMAIL_TO, EMAIL_FROM_NAME)
-    except requests.RequestException as exc:
-        print(f"Warning: failed to send email: {exc}", file=sys.stderr)
+    if send_email_digest:
+        if not email_configured():
+            print(
+                "Error: --email requested but BREVO_API_KEY, EMAIL_TO, or EMAIL_FROM is not set.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        try:
+            html, text = build_email_digest(sections, tickers, total_stories)
+            print(f"Prepared email ({len(html)} chars HTML, {len(text)} chars plain text)")
+            send_email(html, text, BREVO_API_KEY, EMAIL_FROM, EMAIL_TO, EMAIL_FROM_NAME)
+        except requests.RequestException as exc:
+            print(f"Warning: failed to send email: {exc}", file=sys.stderr)
+    else:
+        print("Email skipped (pass --email to enable).")
 
 
 if __name__ == "__main__":

@@ -304,16 +304,91 @@
       transform: translateY(-1px);
       box-shadow: 0 6px 18px rgba(29, 78, 216, 0.4);
     }
-    .subscribe-form {
-      margin-top: 4px;
+    .subscribe-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
     }
-    .subscribe-form iframe {
+    .subscribe-modal[hidden] {
+      display: none;
+    }
+    .subscribe-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(2px);
+    }
+    .subscribe-modal-dialog {
+      position: relative;
       width: 100%;
-      max-width: 540px;
-      height: 305px;
+      max-width: 560px;
+      max-height: calc(100vh - 48px);
+      overflow: hidden;
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: 0 24px 48px rgba(15, 23, 42, 0.2);
+    }
+    .subscribe-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+    .subscribe-modal-header h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .subscribe-modal-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
       border: 0;
       border-radius: 8px;
+      background: transparent;
+      color: #64748b;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .subscribe-modal-close:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+    .subscribe-modal-body {
+      padding: 0;
       background: #fff;
+    }
+    .subscribe-modal-body iframe {
+      display: block;
+      width: 100%;
+      height: 380px;
+      border: 0;
+      background: #fff;
+    }
+    .subscribe-success {
+      padding: 48px 32px;
+      text-align: center;
+    }
+    .subscribe-success h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #15803d;
+    }
+    .subscribe-success p {
+      margin: 0;
+      font-size: 14px;
+      color: #475569;
     }
     .footer {
       padding: 24px 28px;
@@ -368,10 +443,7 @@
         <div class="subscribe-cta" id="subscribe-cta">
           <h2>Get this digest by email</h2>
           <p>Subscribe for free and receive this stock news digest twice daily at 9:00 AM and 8:30 PM IST.</p>
-          <button type="button" class="subscribe-btn" onclick="showSubscribeForm()">Subscribe</button>
-        </div>
-        <div class="subscribe-form" id="subscribe-form" hidden>
-          <iframe data-src="{{ subscribe_form_url }}" title="Email subscription form"></iframe>
+          <button type="button" class="subscribe-btn" onclick="openSubscribeModal()">Subscribe</button>
         </div>
       </section>
       {% endif %}
@@ -486,16 +558,109 @@
     </div>
   </div>
   {% if subscribe_form_url %}
+  <div class="subscribe-modal" id="subscribe-modal" hidden>
+    <div class="subscribe-modal-backdrop" onclick="closeSubscribeModal()"></div>
+    <div class="subscribe-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title">
+      <div class="subscribe-modal-header">
+        <h2 id="subscribe-modal-title">Subscribe to the digest</h2>
+        <button type="button" class="subscribe-modal-close" onclick="closeSubscribeModal()" aria-label="Close">&times;</button>
+      </div>
+      <div class="subscribe-modal-body" id="subscribe-modal-body">
+        <iframe
+          id="subscribe-iframe"
+          data-src="{{ subscribe_form_url }}"
+          title="Email subscription form"
+        ></iframe>
+      </div>
+      <div class="subscribe-success" id="subscribe-success" hidden>
+        <h3>You're subscribed!</h3>
+        <p>Check your email to confirm your subscription.</p>
+      </div>
+    </div>
+  </div>
   <script>
-    function showSubscribeForm() {
-      document.getElementById("subscribe-cta").hidden = true;
-      var form = document.getElementById("subscribe-form");
-      var iframe = form.querySelector("iframe");
-      if (!iframe.src) {
+    (function () {
+      var modal = document.getElementById("subscribe-modal");
+      var iframe = document.getElementById("subscribe-iframe");
+      var modalBody = document.getElementById("subscribe-modal-body");
+      var successPanel = document.getElementById("subscribe-success");
+      var iframeLoadCount = 0;
+      var successHandled = false;
+      var trustedOrigin = /sibforms\.com|brevo\.com|sendinblue\.com/i;
+      var successPattern = /success|subscribed|confirm|thank|submitted|complete/i;
+
+      window.openSubscribeModal = function () {
+        successHandled = false;
+        iframeLoadCount = 0;
+        modalBody.hidden = false;
+        successPanel.hidden = true;
         iframe.src = iframe.dataset.src;
+        modal.hidden = false;
+        document.body.style.overflow = "hidden";
+      };
+
+      window.closeSubscribeModal = function () {
+        modal.hidden = true;
+        document.body.style.overflow = "";
+        iframe.src = "about:blank";
+      };
+
+      function handleSubscribeSuccess() {
+        if (successHandled) {
+          return;
+        }
+        successHandled = true;
+        modalBody.hidden = true;
+        successPanel.hidden = false;
+        window.setTimeout(function () {
+          closeSubscribeModal();
+          var cta = document.getElementById("subscribe-cta");
+          if (cta) {
+            cta.innerHTML =
+              "<h2>Thanks for subscribing!</h2>" +
+              "<p>Check your email to confirm your subscription.</p>";
+          }
+        }, 1800);
       }
-      form.hidden = false;
-    }
+
+      function isSuccessMessage(data) {
+        if (!data) {
+          return false;
+        }
+        if (typeof data === "string") {
+          return successPattern.test(data);
+        }
+        if (typeof data === "object") {
+          return successPattern.test(JSON.stringify(data));
+        }
+        return false;
+      }
+
+      iframe.addEventListener("load", function () {
+        if (modal.hidden) {
+          return;
+        }
+        iframeLoadCount += 1;
+        if (iframeLoadCount > 1) {
+          window.setTimeout(handleSubscribeSuccess, 800);
+        }
+      });
+
+      window.addEventListener("message", function (event) {
+        if (!trustedOrigin.test(event.origin || "")) {
+          return;
+        }
+        if (isSuccessMessage(event.data)) {
+          handleSubscribeSuccess();
+        }
+      });
+
+      window.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && !modal.hidden) {
+          closeSubscribeModal();
+        }
+      });
+    })();
   </script>
   {% endif %}
 </body>

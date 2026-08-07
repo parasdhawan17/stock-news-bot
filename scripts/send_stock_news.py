@@ -547,16 +547,20 @@ def build_web_digest(
     today_label = date.today().strftime("%d %b %Y")
     layout = prepare_email_layout(sections)
     web_story_count = count_web_stories(sections)
+    archives = list_archives()
+    archive_href_prefix = "" if is_archive else "archive/"
     env = get_jinja_env()
     template = env.get_template("web_digest.html")
     return template.render(
         date_label=today_label,
         ticker_count=len(tickers),
         story_count=web_story_count,
-        sections=sections,
         site_url=SITE_URL,
         is_archive=is_archive,
         archive_label=archive_label,
+        archives=archives,
+        archive_href_prefix=archive_href_prefix,
+        visible_story_count=HEADLINES_PER_TICKER,
         **layout,
     )
 

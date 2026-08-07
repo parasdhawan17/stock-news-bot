@@ -11,7 +11,7 @@ Daily US stock news digest delivered to WhatsApp, email, and a GitHub Pages web 
 3. Finnhub fetches the last 24 hours of headlines and real-time quotes per ticker.
 4. A formatted message is sent to your WhatsApp via CallMeBot.
 5. A rich HTML email digest (with thumbnails, summaries, and price changes) is sent via Brevo.
-6. A detailed web digest is generated into `docs/` and published via GitHub Pages (up to 10 full stories per ticker).
+6. A detailed web digest is generated into `docs/` and published via GitHub Pages — top movers highlighted, 3 stories per ticker with expand for more, and in-page archive browsing.
 
 ## Project structure
 
@@ -97,7 +97,7 @@ Or add secrets in the GitHub UI: **Settings → Secrets and variables → Action
 2. Under **Build and deployment**, set **Source** to **Deploy from a branch**.
 3. Set **Branch** to `main` and **Folder** to `/docs`.
 4. Save. The site will be live at `https://<your-username>.github.io/<repo-name>/`.
-5. Past digests are archived at `/archive/` (each workflow run creates a new dated page).
+5. The web digest highlights top movers, shows 3 stories per ticker (expand for more), and includes a collapsible archives panel on the same page. Past digests are also saved at `/archive/` (each workflow run creates a new dated page).
 
 The workflow sets `SITE_URL` automatically so WhatsApp and email footers link to the web digest.
 
@@ -129,7 +129,7 @@ set -a && source .env && set +a
 python scripts/send_stock_news.py
 ```
 
-This generates `docs/index.html` locally. Open it in a browser to preview the web digest.
+This generates `docs/index.html` locally. Open it in a browser to preview the web digest — top movers are featured first, each ticker shows 3 stories with a "see more" expander, and past digests are browsable via the archives panel at the bottom.
 
 Email is skipped if `BREVO_API_KEY`, `EMAIL_TO`, or `EMAIL_FROM` are not set.
 

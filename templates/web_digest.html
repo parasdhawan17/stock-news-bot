@@ -87,6 +87,37 @@
       border-radius: 12px;
       overflow: hidden;
     }
+    .ticker-section.hero-section {
+      border-left: 4px solid #94a3b8;
+    }
+    .ticker-section.hero-section.up { border-left-color: #16a34a; }
+    .ticker-section.hero-section.down { border-left-color: #dc2626; }
+    .ticker-section.mover-highlight {
+      border-color: #cbd5e1;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    }
+    .section-label {
+      margin: 0;
+      padding: 16px 20px 0;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .mover-badge {
+      display: inline-block;
+      margin-left: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      background: #e0e7ff;
+      color: #3730a3;
+      vertical-align: middle;
+    }
     .ticker-header {
       display: flex;
       align-items: center;
@@ -95,6 +126,7 @@
       background: #fafbfc;
       border-bottom: 1px solid #e8ecf0;
     }
+    .hero-section .ticker-header { padding-top: 12px; }
     .ticker-header img.logo {
       width: 56px;
       height: 56px;
@@ -117,6 +149,14 @@
     }
     .change.up { background: #dcfce7; color: #15803d; }
     .change.down { background: #fee2e2; color: #b91c1c; }
+    .change.flat { background: #f1f5f9; color: #64748b; }
+    .hero-image {
+      display: block;
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .hero-image-link { display: block; line-height: 0; }
     .story-list { padding: 8px 0; }
     .story {
       display: flex;
@@ -152,8 +192,75 @@
       font-size: 12px;
       color: #94a3b8;
     }
+    .story-more {
+      border-top: 1px solid #f1f5f9;
+    }
+    .story-more summary {
+      padding: 14px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1d4ed8;
+      cursor: pointer;
+      list-style: none;
+    }
+    .story-more summary::-webkit-details-marker { display: none; }
+    .story-more summary::before {
+      content: "▸ ";
+      display: inline-block;
+      transition: transform 0.15s ease;
+    }
+    .story-more[open] summary::before { transform: rotate(90deg); }
+    .story-more summary:hover { background: #f8fafc; }
     .empty {
       padding: 20px;
+      font-size: 14px;
+      color: #718096;
+      font-style: italic;
+    }
+    .archives-panel {
+      margin: 0 24px 24px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .archives-panel summary {
+      padding: 16px 20px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #0f172a;
+      cursor: pointer;
+      list-style: none;
+      background: #f8fafc;
+    }
+    .archives-panel summary::-webkit-details-marker { display: none; }
+    .archives-panel summary::before {
+      content: "▸ ";
+      display: inline-block;
+      color: #64748b;
+      transition: transform 0.15s ease;
+    }
+    .archives-panel[open] summary::before { transform: rotate(90deg); }
+    .archives-panel summary:hover { background: #f1f5f9; }
+    .archive-list {
+      list-style: none;
+      margin: 0;
+      padding: 0 20px 12px;
+      background: #fff;
+    }
+    .archive-list li {
+      border-bottom: 1px solid #e8ecf0;
+      padding: 12px 0;
+    }
+    .archive-list li:last-child { border-bottom: none; }
+    .archive-list a {
+      color: #1d4ed8;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .archive-list a:hover { text-decoration: underline; }
+    .archives-empty {
+      padding: 16px 20px;
       font-size: 14px;
       color: #718096;
       font-style: italic;
@@ -192,9 +299,7 @@
           {% if is_archive and site_url %}
           <a href="{{ site_url }}/">Latest digest</a>
           {% endif %}
-          {% if site_url %}
-          <a href="{{ site_url }}/archive/">Browse archives</a>
-          {% endif %}
+          <a href="#archives">Browse archives</a>
         </nav>
       </header>
 
@@ -209,21 +314,50 @@
       {% endif %}
 
       <div class="content">
-        {% for section in sections %}
+        {% macro change_class(quote) %}
+          {%- if quote and quote.change_pct is not none -%}
+            {%- if quote.change_pct > 0 -%}up{%- elif quote.change_pct < 0 -%}down{%- else -%}flat{%- endif -%}
+          {%- endif -%}
+        {% endmacro %}
+
+        {% macro render_story(story, hero_image=none) %}
+        <article class="story">
+          {% if story.image and story.image != hero_image %}
+          <img src="{{ story.image }}" alt="">
+          {% endif %}
+          <div class="story-body">
+            <h3><a href="{{ story.url }}" target="_blank" rel="noopener">{{ story.headline }}</a></h3>
+            {% if story.summary %}
+            <p class="summary">{{ story.summary }}</p>
+            {% endif %}
+            <p class="meta">
+              {{ story.source }}
+              {% if story.published_at %} · {{ story.published_at }}{% elif story.relative_time %} · {{ story.relative_time }}{% endif %}
+            </p>
+          </div>
+        </article>
+        {% endmacro %}
+
+        {% macro render_section(section, is_hero=false, is_highlight=false) %}
         {% set sec_quote = section.quote %}
-        {% set sec_positive = sec_quote and sec_quote.change_pct is not none and sec_quote.change_pct >= 0 %}
-        {% set sec_negative = sec_quote and sec_quote.change_pct is not none and sec_quote.change_pct < 0 %}
-        <section class="ticker-section">
+        {% set cls = change_class(sec_quote) %}
+        <section class="ticker-section{% if is_hero %} hero-section {{ cls }}{% elif is_highlight %} mover-highlight{% endif %}">
+          {% if is_hero %}
+          <p class="section-label">Top Mover</p>
+          {% endif %}
           <div class="ticker-header">
             {% if section.logo %}
             <img class="logo" src="{{ section.logo }}" alt="{{ section.ticker }}">
             {% endif %}
             <div>
               <span class="ticker-name">{{ section.ticker }}</span>
+              {% if is_highlight and not is_hero %}
+              <span class="mover-badge">Mover</span>
+              {% endif %}
               {% if sec_quote %}
               <span class="price">${{ "%.2f"|format(sec_quote.price) }}</span>
               {% if sec_quote.change_pct is not none %}
-              <span class="change {% if sec_positive %}up{% else %}down{% endif %}">
+              <span class="change {{ cls }}">
                 {% if sec_quote.change_pct >= 0 %}+{% endif %}{{ "%.2f"|format(sec_quote.change_pct) }}%
               </span>
               {% endif %}
@@ -234,37 +368,57 @@
           {% if section.error %}
           <p class="empty">Could not fetch news for {{ section.ticker }}.</p>
           {% elif section.web_stories %}
+          {% if is_hero and section.hero_image %}
+          <a class="hero-image-link" href="{{ section.web_stories[0].url }}" target="_blank" rel="noopener">
+            <img class="hero-image" src="{{ section.hero_image }}" alt="">
+          </a>
+          {% endif %}
           <div class="story-list">
-            {% for story in section.web_stories %}
-            <article class="story">
-              {% if story.image %}
-              <img src="{{ story.image }}" alt="">
-              {% endif %}
-              <div class="story-body">
-                <h3><a href="{{ story.url }}" target="_blank" rel="noopener">{{ story.headline }}</a></h3>
-                {% if story.summary %}
-                <p class="summary">{{ story.summary }}</p>
-                {% endif %}
-                <p class="meta">
-                  {{ story.source }}
-                  {% if story.published_at %} · {{ story.published_at }}{% elif story.relative_time %} · {{ story.relative_time }}{% endif %}
-                </p>
-              </div>
-            </article>
+            {% for story in section.web_stories[:visible_story_count] %}
+            {{ render_story(story, section.hero_image if is_hero else none) }}
             {% endfor %}
+            {% if section.web_stories|length > visible_story_count %}
+            <details class="story-more">
+              <summary>See {{ section.web_stories|length - visible_story_count }} more stories</summary>
+              {% for story in section.web_stories[visible_story_count:] %}
+              {{ render_story(story, section.hero_image if is_hero else none) }}
+              {% endfor %}
+            </details>
+            {% endif %}
           </div>
           {% else %}
           <p class="empty">No major news for {{ section.ticker }} today.</p>
           {% endif %}
         </section>
+        {% endmacro %}
+
+        {% if hero %}
+        {{ render_section(hero, is_hero=true) }}
+        {% endif %}
+
+        {% for section in compact %}
+        {{ render_section(section, is_highlight=loop.index <= 2) }}
         {% endfor %}
       </div>
 
+      <details class="archives-panel" id="archives">
+        <summary>Browse past digests{% if archives %} ({{ archives|length }}){% endif %}</summary>
+        {% if archives %}
+        <ul class="archive-list">
+          {% for entry in archives %}
+          <li>
+            <a href="{{ archive_href_prefix }}{{ entry.filename }}">{{ entry.label }}</a>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="archives-empty">No archived digests yet.</p>
+        {% endif %}
+      </details>
+
       <footer class="footer">
         <p>{{ ticker_count }} tickers · {{ story_count }} stories · stock-news-bot</p>
-        {% if site_url %}
-        <p><a href="{{ site_url }}/archive/">View past digests</a></p>
-        {% endif %}
+        <p><a href="#archives">View past digests</a></p>
       </footer>
     </div>
   </div>

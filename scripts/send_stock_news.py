@@ -233,15 +233,32 @@ def collect_digest_data(tickers: list[str], api_key: str) -> tuple[list[dict], i
     return sections, total_stories
 
 
-def format_ticker_section_whatsapp(ticker: str, stories: list[dict], error: str | None) -> list[str]:
-    if error:
-        return [f"*{ticker}*\n_Could not fetch news for {ticker}._"]
+def format_whatsapp_quote(section: dict) -> str:
+    ticker = section["ticker"]
+    quote = section.get("quote")
+    if not quote:
+        return f"*{ticker}*"
+    price = f"${quote['price']:.2f}"
+    change_pct = quote.get("change_pct")
+    if change_pct is None:
+        return f"*{ticker}* · {price}"
+    sign = "+" if change_pct >= 0 else ""
+    indicator = "🟢" if change_pct >= 0 else "🔴"
+    return f"*{ticker}* {indicator} {sign}{change_pct:.2f}% · {price}"
 
-    if not stories:
-        return [f"_No major news for {ticker} today._"]
 
-    lines: list[str] = [f"*{ticker}*"]
-    for index, story in enumerate(stories, start=1):
+def format_hero_whatsapp(section: dict) -> str:
+    lines = ["🔥 *TOP MOVER*", format_whatsapp_quote(section), "──────────────"]
+
+    if section["error"]:
+        lines.append(f"_Could not fetch news for {section['ticker']}._")
+        return "\n".join(lines)
+
+    if not section["stories"]:
+        lines.append(f"_No major news for {section['ticker']} today._")
+        return "\n".join(lines)
+
+    for index, story in enumerate(section["stories"], start=1):
         lines.append(f"{index}. {story['headline']}")
         meta = story["source"]
         if story["relative_time"]:
@@ -249,40 +266,75 @@ def format_ticker_section_whatsapp(ticker: str, stories: list[dict], error: str 
         lines.append(f"   _{meta}_")
         if story["url"]:
             lines.append(f"   🔗 {story['url']}")
-    return lines
+
+    return "\n".join(lines)
+
+
+def format_compact_whatsapp(section: dict) -> str:
+    lines = [format_whatsapp_quote(section)]
+
+    if section["error"]:
+        lines.append("_News unavailable_")
+    elif not section["stories"]:
+        lines.append("_No news today_")
+    else:
+        story = section["stories"][0]
+        lines.append(f"• {story['headline']}")
+        if story["url"]:
+            lines.append(f"  🔗 {story['url']}")
+
+    return "\n".join(lines)
 
 
 def build_messages(sections: list[dict], tickers: list[str], total_stories: int) -> list[str]:
-    """Build one WhatsApp message per ticker, plus header and footer."""
+    """Build tiered WhatsApp messages: summary, top mover, compact movers, footer."""
     today_label = date.today().strftime("%d %b %Y")
-    ticker_bodies: list[str] = []
+    layout = prepare_email_layout(sections)
+    summary = layout["market_summary"]
+    compact_per_message = 3
 
-    for section in sections:
-        lines = format_ticker_section_whatsapp(
-            section["ticker"], section["stories"], section["error"]
+    header_lines = [
+        f"📈 *Stock News — {today_label}*",
+        (
+            f"_{len(tickers)} tickers · {total_stories} stories · "
+            f"{summary['gainers']} up · {summary['losers']} down · {summary['flat']} flat_"
+        ),
+    ]
+    if layout["top_mover_label"]:
+        header_lines.append(f"_Top mover: {layout['top_mover_label']}_")
+
+    if layout["movers_bar"]:
+        mover_pills: list[str] = []
+        for mover in layout["movers_bar"]:
+            if mover["change_pct"] is not None:
+                sign = "+" if mover["change_pct"] >= 0 else ""
+                mover_pills.append(f"{mover['ticker']} {sign}{mover['change_pct']:.1f}%")
+            else:
+                mover_pills.append(mover["ticker"])
+        header_lines.append(" · ".join(mover_pills))
+
+    bodies: list[str] = ["\n".join(header_lines)]
+
+    if layout["hero"]:
+        bodies.append(format_hero_whatsapp(layout["hero"]))
+
+    compact_sections = layout["compact"]
+    for index in range(0, len(compact_sections), compact_per_message):
+        batch = compact_sections[index : index + compact_per_message]
+        compact_body = "📊 *Other Movers*\n──────────────\n\n" + "\n\n".join(
+            format_compact_whatsapp(section) for section in batch
         )
-        ticker_bodies.append("\n".join(lines))
+        bodies.append(compact_body)
 
-    total_parts = len(ticker_bodies) + 2
+    bodies.append(
+        f"──────────────\n_{len(tickers)} tickers · {total_stories} stories · stock-news-bot_"
+    )
+
+    total_parts = len(bodies)
     messages: list[str] = []
-
-    messages.append(
-        truncate_message(
-            f"📈 *Stock News — {today_label}*\n"
-            f"_Part 1/{total_parts} · {len(tickers)} tickers · {total_stories} stories_"
-        )
-    )
-
-    for index, body in enumerate(ticker_bodies, start=2):
-        messages.append(truncate_message(f"_Part {index}/{total_parts}_\n\n{body}"))
-
-    messages.append(
-        truncate_message(
-            f"_Part {total_parts}/{total_parts}_\n"
-            f"──────────────\n"
-            f"_{len(tickers)} tickers · {total_stories} stories · stock-news-bot_"
-        )
-    )
+    for index, body in enumerate(bodies, start=1):
+        prefix = f"_Part {index}/{total_parts}_\n\n" if total_parts > 1 else ""
+        messages.append(truncate_message(f"{prefix}{body}"))
 
     return messages
 

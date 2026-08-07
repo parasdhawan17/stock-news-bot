@@ -16,6 +16,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 MAX_MESSAGE_LENGTH = 4000
 HEADLINES_PER_TICKER = 3
+DIGEST_HEADING = "Your stock news briefing"
 WEB_HEADLINES_PER_TICKER = FETCH_LIMIT_PER_TICKER = 10
 SEND_DELAY_SECONDS = 2
 SUMMARY_EXCERPT_LENGTH = 160
@@ -207,6 +208,17 @@ def format_local_time_label(dt: datetime) -> str:
     tz = local_timezone_label(local)
     time_label = local.strftime("%H:%M")
     return f"{time_label} {tz}".strip() if tz else time_label
+
+
+def format_fetched_at_label(dt: datetime) -> str:
+    local = dt.astimezone()
+    hour = local.hour % 12 or 12
+    ampm = "AM" if local.hour < 12 else "PM"
+    tz = local_timezone_label(local)
+    time_label = f"{hour}:{local.strftime('%M')} {ampm}"
+    if tz:
+        time_label = f"{time_label} {tz}"
+    return f"Fetched on {time_label}"
 
 
 def format_local_datetime_label(dt: datetime) -> str:
@@ -542,11 +554,11 @@ def prepare_email_layout(sections: list[dict]) -> dict:
 def format_email_heading(layout: dict) -> str:
     hero = layout.get("hero")
     if not hero:
-        return "Your markets, twice a day"
+        return DIGEST_HEADING
     ticker = hero["ticker"]
     quote = hero.get("quote")
     if not quote or quote.get("change_pct") is None:
-        return "Your markets, twice a day"
+        return DIGEST_HEADING
     change_pct = quote["change_pct"]
     if change_pct > 0:
         return f"{ticker} moved high"
@@ -557,7 +569,7 @@ def format_email_heading(layout: dict) -> str:
 
 def format_email_subject(layout: dict, date_label: str) -> str:
     heading = format_email_heading(layout)
-    if heading == "Your markets, twice a day":
+    if heading == DIGEST_HEADING:
         return f"Tickr Digest · {date_label}"
     return f"{heading} · {date_label}"
 
@@ -690,6 +702,7 @@ def build_web_digest(
         archives=archives,
         archive_href_prefix=archive_href_prefix,
         visible_story_count=HEADLINES_PER_TICKER,
+        digest_heading=DIGEST_HEADING,
         subscribe_form_url=BREVO_SUBSCRIBE_FORM_URL or None,
         **layout,
     )
@@ -737,7 +750,7 @@ def write_web_pages(sections: list[dict], tickers: list[str]) -> None:
     generated_at_utc = datetime.now(timezone.utc)
     generated_at_local = generated_at_utc.astimezone()
     archive_slug = generated_at_utc.strftime("%Y-%m-%d-%H%M")
-    fetched_at_label = format_local_time_label(generated_at_local)
+    fetched_at_label = format_fetched_at_label(generated_at_local)
 
     html = build_web_digest(sections, tickers, fetched_at_label=fetched_at_label)
     archive_html = build_web_digest(

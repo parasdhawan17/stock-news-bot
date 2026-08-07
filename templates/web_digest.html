@@ -22,10 +22,180 @@
       box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
     }
     .header {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
       background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
       padding: 32px 28px;
       text-align: center;
       color: #fff;
+    }
+    .header-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .header-grid {
+      position: absolute;
+      inset: -40px;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 36px 36px;
+      animation: header-grid-scroll 24s linear infinite;
+    }
+    @keyframes header-grid-scroll {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(36px, 36px); }
+    }
+    .header-chart {
+      position: absolute;
+      bottom: -8%;
+      left: 0;
+      width: 100%;
+      height: 72%;
+      opacity: 0.45;
+    }
+    .chart-line {
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .chart-line-up {
+      stroke: #34d399;
+      stroke-dasharray: 1400;
+      stroke-dashoffset: 1400;
+      animation: chart-line-draw 5s ease-in-out infinite alternate;
+    }
+    .chart-line-down {
+      stroke: #f87171;
+      stroke-width: 2;
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      opacity: 0.7;
+      animation: chart-line-draw 6s ease-in-out infinite alternate-reverse;
+    }
+    .chart-grid-line {
+      stroke: rgba(255, 255, 255, 0.07);
+      stroke-width: 1;
+    }
+    .chart-candle {
+      animation: candle-pulse 3s ease-in-out infinite;
+    }
+    .chart-candle.up { fill: rgba(34, 197, 94, 0.35); }
+    .chart-candle.down { fill: rgba(248, 113, 113, 0.3); }
+    .chart-candle:nth-child(odd) { animation-delay: 0.4s; }
+    .chart-candle:nth-child(even) { animation-delay: 1.2s; }
+    @keyframes chart-line-draw {
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes candle-pulse {
+      0%, 100% { opacity: 0.35; transform: scaleY(1); transform-origin: center bottom; }
+      50% { opacity: 0.75; transform: scaleY(1.15); transform-origin: center bottom; }
+    }
+    .header-tickers {
+      position: absolute;
+      inset: 0;
+    }
+    .header-ticker {
+      position: absolute;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      padding: 3px 7px;
+      border-radius: 5px;
+      letter-spacing: 0.02em;
+      animation: ticker-float 7s ease-in-out infinite;
+    }
+    .header-ticker.up {
+      color: #6ee7b7;
+      background: rgba(34, 197, 94, 0.14);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    .header-ticker.down {
+      color: #fca5a5;
+      background: rgba(248, 113, 113, 0.12);
+      border: 1px solid rgba(248, 113, 113, 0.18);
+    }
+    .header-ticker:nth-child(1) { top: 14%; left: 6%; animation-delay: 0s; }
+    .header-ticker:nth-child(2) { top: 22%; right: 8%; animation-delay: 1.1s; }
+    .header-ticker:nth-child(3) { top: 58%; left: 10%; animation-delay: 2.3s; }
+    .header-ticker:nth-child(4) { top: 68%; right: 12%; animation-delay: 0.6s; }
+    .header-ticker:nth-child(5) { top: 38%; left: 22%; animation-delay: 3.2s; }
+    .header-ticker:nth-child(6) { top: 48%; right: 20%; animation-delay: 1.8s; }
+    @keyframes ticker-float {
+      0%, 100% { transform: translateY(0); opacity: 0.18; }
+      50% { transform: translateY(-7px); opacity: 0.38; }
+    }
+    .header-shimmer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        105deg,
+        transparent 42%,
+        rgba(255, 255, 255, 0.05) 50%,
+        transparent 58%
+      );
+      animation: header-shimmer 7s ease-in-out infinite;
+    }
+    @keyframes header-shimmer {
+      0%, 100% { transform: translateX(-120%); }
+      50% { transform: translateX(120%); }
+    }
+    .header-content {
+      position: relative;
+      z-index: 1;
+      isolation: isolate;
+    }
+    .header-content::before {
+      content: "";
+      position: absolute;
+      inset: -28px -20px;
+      z-index: -1;
+      pointer-events: none;
+      background: radial-gradient(
+        ellipse 85% 90% at 50% 50%,
+        rgba(15, 23, 42, 0.72) 0%,
+        rgba(15, 23, 42, 0.35) 55%,
+        transparent 100%
+      );
+    }
+    .header-content .eyebrow {
+      color: #f1f5f9;
+      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.65);
+    }
+    .header-content h1 {
+      color: #ffffff;
+      text-shadow:
+        0 0 24px rgba(15, 23, 42, 0.95),
+        0 2px 6px rgba(0, 0, 0, 0.7);
+    }
+    .header-content p {
+      color: #e2e8f0;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
+    }
+    .header-content .muted {
+      color: #cbd5e1;
+    }
+    .header-content .badge {
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f8fafc;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+    }
+    .header-content .header-nav-link {
+      color: #dbeafe;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
+    }
+    .header-content .nav a {
+      color: #dbeafe;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
+    }
+    .header-content .header-subscribe-btn {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(220, 38, 38, 0.4);
     }
     .eyebrow {
       margin: 0 0 8px;
@@ -297,39 +467,49 @@
       font-style: italic;
     }
     .subscribe-panel {
-      margin: 0 24px 24px;
-      padding: 28px 24px;
+      margin: 0 24px 16px;
+      padding: 12px 16px;
       border: 1px solid #bfdbfe;
-      border-radius: 12px;
+      border-radius: 10px;
       background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
-      text-align: center;
+    }
+    .subscribe-cta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      justify-content: space-between;
+    }
+    .subscribe-copy {
+      flex: 1;
+      min-width: 0;
     }
     .subscribe-panel h2 {
-      margin: 0 0 8px;
-      font-size: 20px;
+      margin: 0 0 4px;
+      font-size: 17px;
       font-weight: 700;
       color: #0f172a;
+      line-height: 1.2;
     }
     .subscribe-panel p {
-      margin: 0 0 20px;
-      font-size: 14px;
+      margin: 0;
+      font-size: 13px;
       color: #475569;
-      max-width: 420px;
-      margin-left: auto;
-      margin-right: auto;
+      line-height: 1.35;
+      max-width: none;
     }
     .subscribe-btn {
       display: inline-block;
-      padding: 12px 28px;
+      padding: 8px 16px;
       border: none;
       border-radius: 999px;
       background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
       color: #fff;
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
       transition: transform 0.15s ease, box-shadow 0.15s ease;
+      white-space: nowrap;
     }
     .subscribe-btn:hover {
       background: linear-gradient(135deg, #f87171 0%, #b91c1c 100%);
@@ -337,29 +517,30 @@
       box-shadow: 0 6px 18px rgba(220, 38, 38, 0.45);
     }
     .subscribe-panel .subscribe-hint {
-      margin: -8px auto 16px;
-      font-size: 13px;
+      margin: 3px 0 0;
+      font-size: 12px;
       color: #64748b;
-      max-width: 420px;
+      line-height: 1.3;
     }
     .subscribe-actions {
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      align-items: center;
+      flex-direction: column;
+      gap: 6px;
+      flex-shrink: 0;
+      align-items: stretch;
     }
     .subscribe-btn-secondary {
       display: inline-block;
-      padding: 12px 22px;
+      padding: 8px 14px;
       border: 1px solid #dc2626;
       border-radius: 999px;
       background: transparent;
       color: #dc2626;
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       transition: background 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
     }
     .subscribe-btn-secondary:hover {
       background: #fef2f2;
@@ -473,6 +654,30 @@
       .story { flex-direction: column; }
       .story img { width: 100%; height: 160px; }
       .ticker-header { flex-wrap: wrap; }
+      .subscribe-cta {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      .subscribe-actions {
+        flex-direction: row;
+        justify-content: center;
+      }
+      .header-ticker { font-size: 9px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .header-grid,
+      .chart-line-up,
+      .chart-line-down,
+      .chart-candle,
+      .header-ticker,
+      .header-shimmer {
+        animation: none !important;
+      }
+      .chart-line-up,
+      .chart-line-down {
+        stroke-dashoffset: 0;
+      }
     }
   </style>
 </head>
@@ -480,8 +685,37 @@
   <div class="container">
     <div class="card">
       <header class="header">
+        <div class="header-bg" aria-hidden="true">
+          <div class="header-grid"></div>
+          <svg class="header-chart" viewBox="0 0 800 140" preserveAspectRatio="none">
+            <line class="chart-grid-line" x1="0" y1="35" x2="800" y2="35" />
+            <line class="chart-grid-line" x1="0" y1="70" x2="800" y2="70" />
+            <line class="chart-grid-line" x1="0" y1="105" x2="800" y2="105" />
+            <rect class="chart-candle up" x="60" y="82" width="8" height="22" rx="1" />
+            <rect class="chart-candle down" x="140" y="48" width="8" height="18" rx="1" />
+            <rect class="chart-candle up" x="220" y="72" width="8" height="28" rx="1" />
+            <rect class="chart-candle up" x="300" y="58" width="8" height="35" rx="1" />
+            <rect class="chart-candle down" x="380" y="42" width="8" height="20" rx="1" />
+            <rect class="chart-candle up" x="460" y="65" width="8" height="30" rx="1" />
+            <rect class="chart-candle down" x="540" y="50" width="8" height="16" rx="1" />
+            <rect class="chart-candle up" x="620" y="70" width="8" height="26" rx="1" />
+            <rect class="chart-candle up" x="700" y="55" width="8" height="32" rx="1" />
+            <path class="chart-line chart-line-up" d="M0,108 L50,100 L100,104 L150,88 L200,92 L250,76 L300,82 L350,68 L400,74 L450,58 L500,64 L550,50 L600,56 L650,42 L700,48 L750,36 L800,40" />
+            <path class="chart-line chart-line-down" d="M0,52 L50,58 L100,54 L150,64 L200,60 L250,70 L300,66 L350,76 L400,72 L450,82 L500,78 L550,88 L600,84 L650,94 L700,90 L750,98 L800,95" />
+          </svg>
+          <div class="header-tickers">
+            <span class="header-ticker up">AAPL +1.2%</span>
+            <span class="header-ticker down">TSLA -0.6%</span>
+            <span class="header-ticker up">NVDA +2.1%</span>
+            <span class="header-ticker down">META -0.3%</span>
+            <span class="header-ticker up">MSFT +0.8%</span>
+            <span class="header-ticker up">VOO +0.4%</span>
+          </div>
+          <div class="header-shimmer"></div>
+        </div>
+        <div class="header-content">
         <p class="eyebrow">Tickr Digest</p>
-        <h1>Your markets, twice a day</h1>
+        <h1>{{ digest_heading }}</h1>
         {% if fetched_at_label %}
         <p class="muted">{{ fetched_at_label }}</p>
         {% endif %}
@@ -497,6 +731,7 @@
           <button type="button" class="header-subscribe-btn" onclick="openSubscribeModal()">Subscribe</button>
           {% endif %}
         </nav>
+        </div>
       </header>
 
       {% if movers_bar %}
@@ -512,9 +747,11 @@
       {% if subscribe_form_url %}
       <section class="subscribe-panel" id="subscribe">
         <div class="subscribe-cta" id="subscribe-cta">
-          <h2>Get Tickr in your inbox</h2>
-          <p>Choose your stocks. We'll send headlines and price moves at 9:00 AM and 8:30 PM IST — only for the tickers you pick.</p>
-          <p class="subscribe-hint">Already subscribed? Enter the same email and pick new tickers to update your digest.</p>
+          <div class="subscribe-copy">
+            <h2>Get Tickr in your inbox</h2>
+            <p>Choose your stocks. We'll send headlines and price moves 15 minutes before the US market opens and 15 minutes after it closes (9:15 AM and 4:15 PM ET) — only for the tickers you pick.</p>
+            <p class="subscribe-hint">Already subscribed? Enter the same email and pick new tickers to update your digest.</p>
+          </div>
           <div class="subscribe-actions">
             <button type="button" class="subscribe-btn" onclick="openSubscribeModal()">Send me the digest</button>
             <button type="button" class="subscribe-btn-secondary" onclick="openSubscribeModal()">Update your tickers</button>

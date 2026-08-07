@@ -14,7 +14,7 @@ A zero-cost daily US stock news digest. Fetches headlines and quotes from Finnhu
 
 ## How it works
 
-1. GitHub Actions runs twice daily (9:00 AM and 8:30 PM IST) or manually via **Run workflow**.
+1. GitHub Actions runs twice daily — 15 minutes before US market open and 15 minutes after close (9:15 AM and 4:15 PM ET) — or manually via **Run workflow**.
 2. If `BREVO_API_KEY` is set, the web digest uses all tickers from the Brevo `TICKERS` multiple-choice catalog; otherwise it falls back to subscriber union or `config/tickers.json`.
 3. Finnhub fetches the last 24 hours of headlines and real-time quotes for every catalog ticker on the web digest.
 4. A web digest is always generated into `docs/` and published to GitHub Pages.
@@ -232,12 +232,14 @@ Set `SITE_URL` in `.env` to include the web digest link in email and WhatsApp fo
 
 The workflow runs at:
 
-| Cron (UTC) | Time (IST) |
-|------------|------------|
-| `30 3 * * *` | 9:00 AM |
-| `0 15 * * *` | 8:30 PM |
+| Cron (UTC) | Time (ET) | When |
+|------------|-----------|------|
+| `15 13 * * *` | 9:15 AM | 15 min before market open |
+| `15 20 * * *` | 4:15 PM | 15 min after market close |
 
-GitHub cron can run a few minutes late on the free tier — fine for a morning/evening digest.
+Cron times assume **Eastern Daylight Time** (UTC−4). When clocks switch to EST (UTC−5), shift each cron by +1 hour (`15 14` and `15 21`) or accept a one-hour offset until you update.
+
+GitHub cron can run late on the free tier — often 15–60+ minutes after the scheduled minute.
 
 ## Notes
 

@@ -267,24 +267,47 @@
     }
     .subscribe-panel {
       margin: 0 24px 24px;
-      padding: 24px;
-      border: 1px solid #e2e8f0;
+      padding: 28px 24px;
+      border: 1px solid #bfdbfe;
       border-radius: 12px;
-      background: #f8fafc;
+      background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
       text-align: center;
     }
     .subscribe-panel h2 {
       margin: 0 0 8px;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 700;
       color: #0f172a;
     }
     .subscribe-panel p {
-      margin: 0 0 16px;
+      margin: 0 0 20px;
       font-size: 14px;
-      color: #64748b;
+      color: #475569;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
     }
-    .subscribe-panel iframe {
+    .subscribe-btn {
+      display: inline-block;
+      padding: 12px 28px;
+      border: 0;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #1d4ed8 0%, #1e3a5f 100%);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .subscribe-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(29, 78, 216, 0.4);
+    }
+    .subscribe-form {
+      margin-top: 4px;
+    }
+    .subscribe-form iframe {
       width: 100%;
       max-width: 540px;
       height: 305px;
@@ -338,6 +361,19 @@
         </span>
         {% endfor %}
       </div>
+      {% endif %}
+
+      {% if subscribe_form_url %}
+      <section class="subscribe-panel" id="subscribe">
+        <div class="subscribe-cta" id="subscribe-cta">
+          <h2>Get this digest by email</h2>
+          <p>Subscribe for free and receive this stock news digest twice daily at 9:00 AM and 8:30 PM IST.</p>
+          <button type="button" class="subscribe-btn" onclick="showSubscribeForm()">Subscribe</button>
+        </div>
+        <div class="subscribe-form" id="subscribe-form" hidden>
+          <iframe data-src="{{ subscribe_form_url }}" title="Email subscription form"></iframe>
+        </div>
+      </section>
       {% endif %}
 
       <div class="content">
@@ -443,19 +479,24 @@
         {% endif %}
       </details>
 
-      {% if subscribe_form_url %}
-      <section class="subscribe-panel" id="subscribe">
-        <h2>Get this digest by email</h2>
-        <p>Subscribe to receive this stock news digest twice daily (9:00 AM and 8:30 PM IST).</p>
-        <iframe src="{{ subscribe_form_url }}" title="Email subscription form"></iframe>
-      </section>
-      {% endif %}
-
       <footer class="footer">
         <p>{{ ticker_count }} tickers · {{ story_count }} stories · stock-news-bot</p>
         <p><a href="#archives">View past digests</a></p>
       </footer>
     </div>
   </div>
+  {% if subscribe_form_url %}
+  <script>
+    function showSubscribeForm() {
+      document.getElementById("subscribe-cta").hidden = true;
+      var form = document.getElementById("subscribe-form");
+      var iframe = form.querySelector("iframe");
+      if (!iframe.src) {
+        iframe.src = iframe.dataset.src;
+      }
+      form.hidden = false;
+    }
+  </script>
+  {% endif %}
 </body>
 </html>

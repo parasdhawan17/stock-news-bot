@@ -217,6 +217,9 @@
           <tr>
             <td style="padding:24px 28px;background-color:#f8fafc;border-top:1px solid #e8ecf0;text-align:center;">
               <p style="margin:0;font-size:12px;color:#94a3b8;">{{ ticker_count }} tickers · {{ story_count }} stories · stock-news-bot</p>
+              {% if site_url %}
+              <p style="margin:8px 0 0;font-size:12px;"><a href="{{ site_url }}/" style="color:#64748b;text-decoration:none;">Read full digest online</a></p>
+              {% endif %}
             </td>
           </tr>
 

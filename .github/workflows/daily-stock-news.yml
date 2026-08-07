@@ -6,6 +6,9 @@ on:
     - cron: '0 15 * * *'   # 8:30 PM IST (UTC+5:30)
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   send-news:
     runs-on: ubuntu-latest
@@ -30,4 +33,13 @@ jobs:
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_FROM_NAME: ${{ secrets.EMAIL_FROM_NAME }}
+          SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
         run: python scripts/send_stock_news.py
+
+      - name: Publish web digest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          git diff --staged --quiet || git commit -m "Update web digest"
+          git push

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch daily US stock news from Finnhub and deliver via WhatsApp and email."""
+"""Fetch daily US stock news from Finnhub and deliver via WhatsApp, email, and web."""
 
 import json
 import os
@@ -14,7 +14,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 MAX_MESSAGE_LENGTH = 4000
 HEADLINES_PER_TICKER = 3
-FETCH_LIMIT_PER_TICKER = 10
+WEB_HEADLINES_PER_TICKER = FETCH_LIMIT_PER_TICKER = 10
 SEND_DELAY_SECONDS = 2
 SUMMARY_EXCERPT_LENGTH = 160
 
@@ -35,10 +35,13 @@ BREVO_API_KEY = os.environ.get("BREVO_API_KEY")
 EMAIL_TO = os.environ.get("EMAIL_TO")
 EMAIL_FROM = os.environ.get("EMAIL_FROM")
 EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "Stock News Bot")
+SITE_URL = os.environ.get("SITE_URL", "").rstrip("/")
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TICKERS_PATH = REPO_ROOT / "config" / "tickers.json"
 TEMPLATES_PATH = REPO_ROOT / "templates"
+DOCS_PATH = REPO_ROOT / "docs"
+ARCHIVE_PATH = DOCS_PATH / "archive"
 
 
 def require_env(name: str, value: str | None) -> str:
@@ -121,6 +124,15 @@ def story_dedupe_key(item: dict) -> str:
     return item.get("url", "").strip().lower()
 
 
+def format_full_datetime(unix_ts: int | float | None) -> str:
+    if not unix_ts:
+        return ""
+    published = datetime.fromtimestamp(unix_ts, tz=timezone.utc)
+    hour = published.hour % 12 or 12
+    ampm = "AM" if published.hour < 12 else "PM"
+    return f"{published.day} {published.strftime('%b %Y')}, {hour}:{published.strftime('%M')} {ampm} UTC"
+
+
 def format_relative_time(unix_ts: int | float | None) -> str:
     if not unix_ts:
         return ""
@@ -169,6 +181,8 @@ def select_stories(
     news: list[dict],
     seen_stories: set[str],
     limit: int = HEADLINES_PER_TICKER,
+    *,
+    excerpt: bool = True,
 ) -> list[dict]:
     stories: list[dict] = []
     for item in news:
@@ -181,16 +195,21 @@ def select_stories(
         stories.append(
             {
                 "headline": item.get("headline", "No headline").strip(),
-                "summary": excerpt_summary(summary) if summary else "",
+                "summary": excerpt_summary(summary) if excerpt and summary else summary,
                 "image": sanitize_article_image(item.get("image")),
                 "url": item.get("url", "").strip(),
                 "source": item.get("source", "").strip() or "News",
                 "relative_time": format_relative_time(item.get("datetime")),
+                "published_at": format_full_datetime(item.get("datetime")),
             }
         )
         if len(stories) >= limit:
             break
     return stories
+
+
+def select_web_stories(news: list[dict], limit: int = WEB_HEADLINES_PER_TICKER) -> list[dict]:
+    return select_stories(news, set(), limit=limit, excerpt=False)
 
 
 def collect_digest_data(tickers: list[str], api_key: str) -> tuple[list[dict], int]:
@@ -205,6 +224,7 @@ def collect_digest_data(tickers: list[str], api_key: str) -> tuple[list[dict], i
             "logo": None,
             "hero_image": None,
             "stories": [],
+            "web_stories": [],
             "error": None,
         }
 
@@ -222,6 +242,7 @@ def collect_digest_data(tickers: list[str], api_key: str) -> tuple[list[dict], i
             news = fetch_news(ticker, api_key)
             stories = select_stories(news, seen_stories)
             section["stories"] = stories
+            section["web_stories"] = select_web_stories(news)
             section["hero_image"] = next((story["image"] for story in stories if story["image"]), None)
             total_stories += len(stories)
         except requests.RequestException as exc:
@@ -286,6 +307,13 @@ def format_compact_whatsapp(section: dict) -> str:
     return "\n".join(lines)
 
 
+def footer_text(ticker_count: int, story_count: int) -> str:
+    line = f"{ticker_count} tickers · {story_count} stories · stock-news-bot"
+    if SITE_URL:
+        line += f"\nRead full digest: {SITE_URL}/"
+    return line
+
+
 def build_messages(sections: list[dict], tickers: list[str], total_stories: int) -> list[str]:
     """Build tiered WhatsApp messages: summary, top mover, compact movers, footer."""
     today_label = date.today().strftime("%d %b %Y")
@@ -327,7 +355,7 @@ def build_messages(sections: list[dict], tickers: list[str], total_stories: int)
         bodies.append(compact_body)
 
     bodies.append(
-        f"──────────────\n_{len(tickers)} tickers · {total_stories} stories · stock-news-bot_"
+        f"──────────────\n_{footer_text(len(tickers), total_stories)}_"
     )
 
     total_parts = len(bodies)
@@ -420,16 +448,14 @@ def build_email_digest(
     sections: list[dict], tickers: list[str], total_stories: int
 ) -> tuple[str, str]:
     today_label = date.today().strftime("%d %b %Y")
-    env = Environment(
-        loader=FileSystemLoader(TEMPLATES_PATH),
-        autoescape=select_autoescape(["html"]),
-    )
+    env = get_jinja_env()
     template = env.get_template("email_digest.html")
     layout = prepare_email_layout(sections)
     html = template.render(
         date_label=today_label,
         ticker_count=len(tickers),
         story_count=total_stories,
+        site_url=SITE_URL,
         **layout,
     )
     text = build_plain_text(layout, today_label, len(tickers), total_stories)
@@ -496,8 +522,112 @@ def build_plain_text(
     for section in layout["compact"]:
         lines.extend(format_section_plain_text(section, compact=True))
 
-    lines.append(f"{ticker_count} tickers · {story_count} stories · stock-news-bot")
+    lines.append(footer_text(ticker_count, story_count))
     return "\n".join(lines)
+
+
+def get_jinja_env() -> Environment:
+    return Environment(
+        loader=FileSystemLoader(TEMPLATES_PATH),
+        autoescape=select_autoescape(["html"]),
+    )
+
+
+def count_web_stories(sections: list[dict]) -> int:
+    return sum(len(section.get("web_stories", [])) for section in sections)
+
+
+def build_web_digest(
+    sections: list[dict],
+    tickers: list[str],
+    *,
+    is_archive: bool = False,
+    archive_label: str | None = None,
+) -> str:
+    today_label = date.today().strftime("%d %b %Y")
+    layout = prepare_email_layout(sections)
+    web_story_count = count_web_stories(sections)
+    env = get_jinja_env()
+    template = env.get_template("web_digest.html")
+    return template.render(
+        date_label=today_label,
+        ticker_count=len(tickers),
+        story_count=web_story_count,
+        sections=sections,
+        site_url=SITE_URL,
+        is_archive=is_archive,
+        archive_label=archive_label,
+        **layout,
+    )
+
+
+def parse_archive_filename(path: Path) -> datetime | None:
+    stem = path.stem
+    try:
+        return datetime.strptime(stem, "%Y-%m-%d-%H%M").replace(tzinfo=timezone.utc)
+    except ValueError:
+        return None
+
+
+def list_archives() -> list[dict]:
+    if not ARCHIVE_PATH.is_dir():
+        return []
+
+    archives: list[dict] = []
+    for path in ARCHIVE_PATH.glob("*.html"):
+        if path.name == "index.html":
+            continue
+        generated_at = parse_archive_filename(path)
+        if not generated_at:
+            continue
+        archives.append(
+            {
+                "filename": path.name,
+                "label": generated_at.strftime("%d %b %Y, %H:%M UTC"),
+                "generated_at": generated_at,
+            }
+        )
+
+    archives.sort(key=lambda entry: entry["generated_at"], reverse=True)
+    return archives
+
+
+def build_archive_index(archives: list[dict]) -> str:
+    env = get_jinja_env()
+    template = env.get_template("archive_index.html")
+    return template.render(archives=archives, site_url=SITE_URL)
+
+
+def write_web_pages(sections: list[dict], tickers: list[str]) -> None:
+    generated_at = datetime.now(timezone.utc)
+    archive_slug = generated_at.strftime("%Y-%m-%d-%H%M")
+    archive_label = generated_at.strftime("%d %b %Y, %H:%M UTC")
+
+    html = build_web_digest(sections, tickers)
+    archive_html = build_web_digest(
+        sections,
+        tickers,
+        is_archive=True,
+        archive_label=archive_label,
+    )
+
+    DOCS_PATH.mkdir(parents=True, exist_ok=True)
+    ARCHIVE_PATH.mkdir(parents=True, exist_ok=True)
+    (DOCS_PATH / ".nojekyll").touch(exist_ok=True)
+
+    index_path = DOCS_PATH / "index.html"
+    archive_path = ARCHIVE_PATH / f"{archive_slug}.html"
+
+    index_path.write_text(html, encoding="utf-8")
+    archive_path.write_text(archive_html, encoding="utf-8")
+
+    archives = list_archives()
+    archive_index_path = ARCHIVE_PATH / "index.html"
+    archive_index_path.write_text(build_archive_index(archives), encoding="utf-8")
+
+    print(f"Web digest written to {index_path}")
+    print(f"Archive written to {archive_path}")
+    print(f"Archive index updated ({len(archives)} entries)")
 
 
 def send_whatsapp(message: str, phone: str, api_key: str) -> None:
@@ -561,6 +691,8 @@ def main() -> None:
 
     tickers = load_tickers()
     sections, total_stories = collect_digest_data(tickers, finnhub_key)
+
+    write_web_pages(sections, tickers)
 
     messages = build_messages(sections, tickers, total_stories)
     total_chars = sum(len(message) for message in messages)

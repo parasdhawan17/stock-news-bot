@@ -1,8 +1,8 @@
 # Stock News Bot
 
-Daily US stock news digest delivered to WhatsApp and email via GitHub Actions.
+Daily US stock news digest delivered to WhatsApp, email, and a GitHub Pages web digest.
 
-**Cost: $0** — Finnhub free API, CallMeBot free WhatsApp delivery, Brevo free email tier, GitHub Actions on a public repo.
+**Cost: $0** — Finnhub free API, CallMeBot free WhatsApp delivery, Brevo free email tier, GitHub Pages, GitHub Actions on a public repo.
 
 ## How it works
 
@@ -11,6 +11,7 @@ Daily US stock news digest delivered to WhatsApp and email via GitHub Actions.
 3. Finnhub fetches the last 24 hours of headlines and real-time quotes per ticker.
 4. A formatted message is sent to your WhatsApp via CallMeBot.
 5. A rich HTML email digest (with thumbnails, summaries, and price changes) is sent via Brevo.
+6. A detailed web digest is generated into `docs/` and published via GitHub Pages (up to 10 full stories per ticker).
 
 ## Project structure
 
@@ -18,8 +19,12 @@ Daily US stock news digest delivered to WhatsApp and email via GitHub Actions.
 stock-news-bot/
 ├── .github/workflows/daily-stock-news.yml
 ├── config/tickers.json
+├── docs/                          # Generated web digest (GitHub Pages)
 ├── scripts/send_stock_news.py
-├── templates/email_digest.html
+├── templates/
+│   ├── email_digest.html
+│   ├── web_digest.html
+│   └── archive_index.html
 ├── requirements.txt
 └── README.md
 ```
@@ -86,11 +91,21 @@ git push -u origin main   # after creating the repo on GitHub
 
 Or add secrets in the GitHub UI: **Settings → Secrets and variables → Actions**.
 
-### 6. Test
+### 6. Enable GitHub Pages
+
+1. In your repo: **Settings → Pages**.
+2. Under **Build and deployment**, set **Source** to **Deploy from a branch**.
+3. Set **Branch** to `main` and **Folder** to `/docs`.
+4. Save. The site will be live at `https://<your-username>.github.io/<repo-name>/`.
+5. Past digests are archived at `/archive/` (each workflow run creates a new dated page).
+
+The workflow sets `SITE_URL` automatically so WhatsApp and email footers link to the web digest.
+
+### 7. Test
 
 1. Open **Actions** → **Daily Stock News** → **Run workflow**.
-2. Check the run logs for `WhatsApp message sent` and `Email sent`.
-3. Confirm the WhatsApp message and HTML email on your devices.
+2. Check the run logs for `Web digest written`, `WhatsApp message sent`, and `Email sent`.
+3. Confirm the WhatsApp message, HTML email, and web page on your devices.
 
 ## Customize tickers
 
@@ -114,7 +129,11 @@ set -a && source .env && set +a
 python scripts/send_stock_news.py
 ```
 
+This generates `docs/index.html` locally. Open it in a browser to preview the web digest.
+
 Email is skipped if `BREVO_API_KEY`, `EMAIL_TO`, or `EMAIL_FROM` are not set.
+
+Set `SITE_URL` in `.env` to include the web digest link in WhatsApp and email footers during local runs.
 
 ## Schedule
 

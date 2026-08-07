@@ -15,8 +15,8 @@ A zero-cost daily US stock news digest. Fetches headlines and quotes from Finnhu
 ## How it works
 
 1. GitHub Actions runs twice daily (9:00 AM and 8:30 PM IST) or manually via **Run workflow**.
-2. If `BREVO_LIST_ID` is set, subscribers' tickers are read from Brevo contact attributes; otherwise tickers come from `config/tickers.json`.
-3. Finnhub fetches the last 24 hours of headlines and real-time quotes for the **union** of all subscriber tickers (web digest).
+2. If `BREVO_API_KEY` is set, the web digest uses all tickers from the Brevo `TICKERS` multiple-choice catalog; otherwise it falls back to subscriber union or `config/tickers.json`.
+3. Finnhub fetches the last 24 hours of headlines and real-time quotes for every catalog ticker on the web digest.
 4. A web digest is always generated into `docs/` and published to GitHub Pages.
 5. Email is sent when `--email` is passed — each subscriber receives only their selected tickers.
 6. WhatsApp is sent when `--whatsapp` is passed (uses `config/tickers.json`; opt-in; not enabled in CI by default).
@@ -60,7 +60,7 @@ The digest UI includes a movers summary bar, a featured top-mover section, ranke
 
 ## Email subscriptions
 
-Visitors subscribe from the web digest via a Brevo embedded form and enter the US tickers they want (comma-separated, max 10). Each workflow run fetches contacts from your Brevo list, builds the web digest from the **union** of all subscriber tickers, and sends each subscriber a **personalized** email with only their tickers.
+Visitors subscribe from the web digest via a Brevo embedded form and pick tickers from a predefined list. Each workflow run builds the **public web digest from the full Brevo `TICKERS` catalog** (all form options) and sends each subscriber a **personalized** email with only their selected tickers.
 
 ### One-time Brevo setup
 
@@ -82,14 +82,14 @@ Subscribers can re-submit the same form to update their tickers (Brevo upserts t
 - **Double opt-in:** New signups must confirm via Brevo before they appear in the list and receive digests.
 - **Unsubscribe:** Managed automatically by Brevo for list contacts.
 - **Invalid or missing tickers:** Subscribers without valid `TICKERS` are skipped (logged in workflow output).
-- **Finnhub:** Each ticker in the union uses 3 API calls per run (news, quote, logo). Keep total union size reasonable.
+- **Finnhub:** Each ticker in the web catalog uses 3 API calls per run (news, quote, logo). Keep the Brevo option list reasonably sized.
 
 ## Project structure
 
 ```
 stock-news-bot/
 ├── .github/workflows/daily-stock-news.yml
-├── config/tickers.json              # Fallback watchlist (WhatsApp, empty subscriber union)
+├── config/tickers.json              # Fallback watchlist (WhatsApp, no Brevo catalog)
 ├── docs/                            # Generated web digest (GitHub Pages)
 │   ├── index.html
 │   └── archive/

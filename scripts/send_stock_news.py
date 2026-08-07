@@ -95,6 +95,21 @@ def parse_tickers(raw: str | list | tuple | None) -> list[str]:
     return result
 
 
+def parse_ticker_catalog(options: list | tuple) -> list[str]:
+    """Parse all valid tickers from Brevo multiCategoryOptions (no per-user cap)."""
+    seen: set[str] = set()
+    result: list[str] = []
+    for item in options:
+        ticker = str(item).strip().upper()
+        if not ticker or ticker in seen:
+            continue
+        if not TICKER_PATTERN.match(ticker):
+            continue
+        seen.add(ticker)
+        result.append(ticker)
+    return result
+
+
 def union_tickers(subscribers: list[dict]) -> list[str]:
     seen: set[str] = set()
     result: list[str] = []
@@ -747,6 +762,24 @@ def fetch_subscribers_with_tickers(list_id: int, api_key: str) -> list[dict]:
     return subscribers
 
 
+def fetch_brevo_ticker_catalog(api_key: str) -> list[str]:
+    headers = {"api-key": api_key, "Accept": "application/json"}
+    response = requests.get(
+        "https://api.brevo.com/v3/contacts/attributes",
+        headers=headers,
+        timeout=30,
+    )
+    response.raise_for_status()
+    for attribute in response.json().get("attributes", []):
+        if attribute.get("name", "").upper() != BREVO_TICKERS_ATTRIBUTE:
+            continue
+        options = attribute.get("multiCategoryOptions") or []
+        tickers = parse_ticker_catalog(options)
+        if tickers:
+            return tickers
+    return []
+
+
 def send_email(
     html: str,
     text: str,
@@ -784,7 +817,20 @@ def send_email(
             time.sleep(SEND_DELAY_SECONDS)
 
 
-def resolve_digest_tickers(subscribers: list[dict]) -> list[str]:
+def resolve_web_tickers(api_key: str | None, subscribers: list[dict]) -> list[str]:
+    if api_key:
+        try:
+            catalog = fetch_brevo_ticker_catalog(api_key)
+            if catalog:
+                print(f"Using {len(catalog)} ticker(s) from Brevo TICKERS catalog")
+                return catalog
+            print(
+                "Warning: Brevo TICKERS catalog empty or missing; falling back",
+                file=sys.stderr,
+            )
+        except requests.RequestException as exc:
+            print(f"Warning: failed to fetch Brevo ticker catalog: {exc}", file=sys.stderr)
+
     union = union_tickers(subscribers)
     if union:
         print(f"Using {len(union)} ticker(s) from subscriber union")
@@ -831,9 +877,8 @@ def main() -> None:
     if BREVO_LIST_ID and BREVO_API_KEY:
         subscribers = fetch_subscribers_with_tickers(int(BREVO_LIST_ID), BREVO_API_KEY)
         print(f"Fetched {len(subscribers)} subscriber(s) from Brevo list {BREVO_LIST_ID}")
-        digest_tickers = resolve_digest_tickers(subscribers)
-    else:
-        digest_tickers = load_tickers()
+
+    digest_tickers = resolve_web_tickers(BREVO_API_KEY, subscribers)
 
     sections, _ = collect_digest_data(digest_tickers, finnhub_key)
     write_web_pages(sections, digest_tickers)

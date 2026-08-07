@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock News — 07 Aug 2026</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      background: #eef1f5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1a1a2e;
+      line-height: 1.5;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    }
+    .header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      padding: 32px 28px;
+      text-align: center;
+      color: #fff;
+    }
+    .eyebrow {
+      margin: 0 0 8px;
+      font-size: 11px;
+      color: #94a3b8;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .header h1 {
+      margin: 0 0 10px;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .header p { margin: 0 0 6px; font-size: 14px; color: #cbd5e1; }
+    .header .muted { color: #94a3b8; font-size: 13px; }
+    .badge {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      font-size: 13px;
+      color: #e2e8f0;
+    }
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 16px;
+      font-size: 13px;
+    }
+    .nav a { color: #93c5fd; text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    .movers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 16px 20px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e8ecf0;
+    }
+    .pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .pill.up { background: #dcfce7; color: #15803d; }
+    .pill.down { background: #fee2e2; color: #b91c1c; }
+    .pill.flat { background: #f1f5f9; color: #64748b; }
+    .content { padding: 24px; }
+    .ticker-section {
+      margin-bottom: 28px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .ticker-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 20px;
+      background: #fafbfc;
+      border-bottom: 1px solid #e8ecf0;
+    }
+    .ticker-header img.logo {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+    }
+    .ticker-name {
+      font-size: 24px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+    }
+    .price { font-size: 22px; font-weight: 700; color: #1e293b; margin-left: 10px; }
+    .change {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 700;
+      margin-left: 8px;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .change.up { background: #dcfce7; color: #15803d; }
+    .change.down { background: #fee2e2; color: #b91c1c; }
+    .story-list { padding: 8px 0; }
+    .story {
+      display: flex;
+      gap: 16px;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .story:last-child { border-bottom: none; }
+    .story img {
+      width: 120px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    .story-body { flex: 1; min-width: 0; }
+    .story h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .story h3 a { color: #1d4ed8; text-decoration: none; }
+    .story h3 a:hover { text-decoration: underline; }
+    .story .summary {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: #475569;
+      line-height: 1.6;
+    }
+    .story .meta {
+      margin: 0;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .empty {
+      padding: 20px;
+      font-size: 14px;
+      color: #718096;
+      font-style: italic;
+    }
+    .footer {
+      padding: 24px 28px;
+      background: #f8fafc;
+      border-top: 1px solid #e8ecf0;
+      text-align: center;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .footer a { color: #64748b; }
+    @media (max-width: 600px) {
+      .story { flex-direction: column; }
+      .story img { width: 100%; height: 160px; }
+      .ticker-header { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <header class="header">
+        <p class="eyebrow">Tickr Digest</p>
+        <h1>Stock News — 07 Aug 2026</h1>
+        
+        <p>9 tickers · 90 stories</p>
+        <p class="muted">3 up · 6 down · 0 flat</p>
+        
+        <p class="badge">Top mover today: <strong>MSFT +2.54%</strong></p>
+        
+        <nav class="nav">
+          
+          
+          <a href="https://parasdhawan17.github.io/stock-news-bot/archive/">Browse archives</a>
+          
+        </nav>
+      </header>
+
+      
+      <div class="movers">
+        
+        <span class="pill up">
+          MSFT +2.5%
+        </span>
+        
+        <span class="pill down">
+          GOOGL -1.3%
+        </span>
+        
+        <span class="pill down">
+          NFLX -0.7%
+        </span>
+        
+        <span class="pill down">
+          TSLA -0.6%
+        </span>
+        
+        <span class="pill up">
+          META +0.2%
+        </span>
+        
+        <span class="pill down">
+          VOO -0.2%
+        </span>
+        
+        <span class="pill down">
+          AMZN -0.1%
+        </span>
+        
+        <span class="pill down">
+          NVDA -0.1%
+        </span>
+        
+        <span class="pill up">
+          IAU +0.0%
+        </span>
+        
+      </div>
+      
+
+      <div class="content">
+        
+        
+        
+        
+        <section class="ticker-section">
+          <div class="ticker-header">
+            
+            <div>
+              <span class="ticker-name">VOO</span>
+              
+              <span class="price">$706.40</span>
+              
+              <span class="change down">
+                -0.17%
+              </span>
+              
+              
+            </div>
+          </div>
+
+          
+          <div class="story-list">
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=aaecb6cc96c9c97f8296b5e910009b1f921af814aa5017faf5797e1fb98445fe" target="_blank" rel="noopener">Prediction: This Unstoppable Vanguard ETF Will Crush the S&amp;P 500 in the Remainder of 2026</a></h3>
+                
+                <p class="summary">Some of America&#39;s largest growth stocks had a sluggish start to 2026, but they&#39;re bouncing back.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 9:50 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2261779044/image_2261779044.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=cce95ec3ae85560061187839e5f28dbacd0594f51d7628fa669e129a6e9740a3" target="_blank" rel="noopener">What Japan Just Taught Us About Trusting A Fiat Currency</a></h3>
+                
+                <p class="summary">Japanâs yen slide sparks rare U.S.-Japan intervention.</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 7 Aug 2026, 5:56 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=a85feeba9e6638235208d2df395878fb18c759835fb1324f3e4878b882e43c67" target="_blank" rel="noopener">Goldman’s S&amp;P 500 ETF Charges 10 Times More Than Vanguard for the Same 500 Stocks</a></h3>
+                
+                <p class="summary">Goldman&#39;s covered-call ETF promises fat monthly checks from the same 500 stocks you can own for a fraction of the price elsewhere, but the fine print on where that income actually comes from changes the math entirely.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 4:15 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=6ad9625cc5a968cfa22376163eb1e0395b8300304cb192c88d05770b2e79d683" target="_blank" rel="noopener">You Thought You Owned 3,600 Stocks—You Actually Own a $1.2 Trillion Tech Bet</a></h3>
+                
+                <p class="summary">VTI promises exposure to thousands of American companies, but the math behind its ten-year returns tells a very different story about where your money actually ends up.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 3:15 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2223715503/image_2223715503.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=f1f73534cf7e3e40d71b94d7296363b4b05826a2d9014c0ad6219c7b224551b1" target="_blank" rel="noopener">Credit Says The Capital Goods Recession Story Doesn&#39;t Hold Up</a></h3>
+                
+                <p class="summary">Every market shock produces a story fast enough to explain it, and the story that formed around Julyâs selloff was a good one</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 7 Aug 2026, 12:20 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=7952e3b9f56518ff36ea8239e9da0bbeeafb5575ce70430a2046c504238b71b1" target="_blank" rel="noopener">$500 a Month Into SCHD for 20 Years: the Dividend Snowball Will Shock You</a></h3>
+                
+                <p class="summary">Most SCHD investors quit before the moment that changes everything: when their dividends start buying more shares each year than their own contributions do. Running the full 20-year projection reveals why that crossover point matters more than the starting yield.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 6 Aug 2026, 7:30 PM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1329905564/image_1329905564.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=04b6631429eb148ee8a5df14515afcc77f2824e7e5ec6f19f5ebd3541d624782" target="_blank" rel="noopener">The Hormuz Illusion: Wall Street Is Buying Fake Peace</a></h3>
+                
+                <p class="summary">Markets may be mispricing Middle East risks. Learn why Hormuz tensions, low US SPR, rising yields and inflation fears could hit stocksâread now.</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 6 Aug 2026, 5:00 PM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2260383935/image_2260383935.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=65ae62070ff8720d61850f89035d5a2fb8825f0b4a968e62621e093feb56edfd" target="_blank" rel="noopener">Stop Calling It A Bubble</a></h3>
+                
+                <p class="summary">The internal AI rotation favors hyperscalers and software without breaking the theme, with strong earnings and broader leadership. Read the full analysis here.</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 6 Aug 2026, 3:57 PM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2243181491/image_2243181491.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=c96b01988f81e4fffecba9d0ef30a8031fb28e8b8da66cc22bf6a56a730751fb" target="_blank" rel="noopener">AAII Sentiment Survey: Optimism Jumps</a></h3>
+                
+                <p class="summary">Track the latest investor sentiment update: bullish jumps to 37%, bearish dips to 38%, neutral slides to 25%. Click here to read the latest survey results.</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 6 Aug 2026, 2:52 PM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://cdn.benzinga.com/files/images/story/2026/08/06/SP-500-Nears-7-000-Mark.jpg?width=2048&amp;height=1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=7bc94f808213a9d969c264c5f517d7d238633cc8b8cb41de39f834000bb2e324" target="_blank" rel="noopener">S&amp;P 500, Dow Fall as Brent Jumps 4%, SanDisk Trims Losses: Stock Market Today</a></h3>
+                
+                <p class="summary">Crude&amp;#39;s rebound on Yemen strikes pulled U.S. equities off record highs Thursday, while SanDisk pared losses despite record margins.</p>
+                
+                <p class="meta">
+                  Benzinga
+                   · 6 Aug 2026, 1:31 PM UTC
+                </p>
+              </div>
+            </article>
+            
+          </div>
+          
+        </section>
+        
+        
+        
+        
+        <section class="ticker-section">
+          <div class="ticker-header">
+            
+            <img class="logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/FB.png" alt="META">
+            
+            <div>
+              <span class="ticker-name">META</span>
+              
+              <span class="price">$589.90</span>
+              
+              <span class="change up">
+                +0.19%
+              </span>
+              
+              
+            </div>
+          </div>
+
+          
+          <div class="story-list">
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=a25c345a2bf581d92f29fbaf7cd5d7a98754e33684e5a86739134b34e9233be1" target="_blank" rel="noopener">Amazon CEO Andy Jassy Just Gave Investors 220 Billion Reasons to Buy Micron Stock</a></h3>
+                
+                <p class="summary">Amazon just raised its artificial intelligence (AI) budget to $220 billion, up from a prior estimate of $200 billion.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 9:20 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=aa7ccd9ed66ee8cb1683c65cb39f8c011a22bf8ea3ec09ae7cf6dc3def8fde91" target="_blank" rel="noopener">Mark Zuckerberg&#39;s Net Worth Swung by Double-Digit Billions Twice This Summer as Meta&#39;s AI Spending Divides Wall Street. Here&#39;s What the Volatility Signals for Investors.</a></h3>
+                
+                <p class="summary">Zuckerberg&#39;s fortune swung by tens of billions, but the real story is what Meta&#39;s AI spending means for every investor holding the stock.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 8:15 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=f5973fd2fe11adbf30cb339f9b7ae34f633dc910c8f2b9b3bd91f9c180e57f13" target="_blank" rel="noopener">Market Chatter: Meta Platforms Ordered to Pay $567 Million by New Mexico Judge</a></h3>
+                
+                <p class="summary">Meta Platforms (META) has been ordered by a New Mexico judge to pay $567 million into an abatement f</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 8:12 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://www.chartmill.com/images/uploads/THUMBNAILS_CHARTMILL_1000_528_91_f2c0771a33.webp" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=c42e3831622718b4f9a1ba0e6c62cc5085b39b425b74d855b0adf96ae23b213e" target="_blank" rel="noopener">Oil Price Spoils the Party on Wall Street, Memory Chips Take a Hard Hit</a></h3>
+                
+                <p class="summary">A nearly 5 percent jump in Brent crude pushed U.S. yields higher and put the recent rally on pause. Memory chip stocks corrected sharply despite better-than-expected quarterly results.</p>
+                
+                <p class="meta">
+                  ChartMill
+                   · 7 Aug 2026, 7:46 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=ace76c22af42fc5516268dd0f9a0a2bfce4c87a2ca22404fd54b8594cd824027" target="_blank" rel="noopener">Michael Burry Shares &#39;Three Great Charts&#39; That Show Big AI Capex Could Unwind As Badly As Housing Did In 2008</a></h3>
+                
+                <p class="summary">Cloud companies’ capex would run at roughly 3% of the U.S. GDP every year from 2027 to 2029, up from 0.3% of GDP in 2019 and 1.4% in 2025, according to a top economist.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 5:48 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=fcd36648a7d95af6f5a6df29b074d08ba40e566f3a9b7bd968db8c5677818baf" target="_blank" rel="noopener">Snap’s 2 Big Problems That Scream ‘Stay Away From the Stock’</a></h3>
+                
+                <p class="summary">Snap  stock popped after it reported earnings, but soon crackled as the gains disappeared.  Shares of Snap initially jumped 15% on Tuesday following its earnings release, as investors cheered stronger-than-expected revenue and earnings.  All the growth is coming from the rest of the world, but those users aren’t very valuable, with average revenue per user (ARPU) of just $1, versus $10.26 in North America.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 5:45 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=cb85e64304d09dc95c404bbd3a93d35952ed204ce0dc5051ad3d477f9975a2c8" target="_blank" rel="noopener">Meta Owes $942M To New Mexico After Judge Rules In Social Media Case; Zuckerberg Promises Appeal</a></h3>
+                
+                <p class="summary">In the second phase of New Mexico’s already big bucks social media lawsuit against META, a judge today slapped the Mark Zuckerberg created tech-giant with a penalty in the hundreds of millions of dollars and also put some potentially big restrictions about the company can and cannot do when it comes to kids being on …</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 5:42 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=3c8475d010eeb292a5a164fa8c3070047dec1571403aafb605fc20afb8feacd3" target="_blank" rel="noopener">Is Broadcom the Best Chip Stock to Own Now? Maybe</a></h3>
+                
+                <p class="summary">Broadcom sits at a tollbooth on the AI buildout, and one look at its order book raises a question worth asking: why are so many chip investors still looking elsewhere?</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 4:57 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=18fb79635368a67ea83ee07a7280756d59f54966ca2083b178a9201c4ef57fc2" target="_blank" rel="noopener">Meta ordered to pay almost $1bn over child safety failings</a></h3>
+                
+                <p class="summary">Meta, the owner of Facebook, Instagram and WhatsApp, has been ordered to pay $567m (£421m) to address the harm caused to children on its platforms.  The ruling, handed down by a US judge in New Mexico, stipulates that the bulk of the money – $420m (£312m) – will be used for treatment services for young people, while the rest will go towards awareness and prevention, screening services and other costs over the next five years.  The new penalty is in addition to the $375m (£280m) Meta was ordered to pay in damages after a jury ruled in March that the company had knowingly harmed children&#39;s mental health, taking the total to almost $1bn.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 2:57 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=d3a88f02aa90c66259924de3a6c19e18fa2e9ce3db915cd48c67fb136c156fb2" target="_blank" rel="noopener">Meta ordered to pay more than US$900 million in New Mexico child safety case</a></h3>
+                
+                <p class="summary">Meta Platforms Inc (NASDAQ:META, XETRA:FB2A, SIX:FB) has been ordered to pay more than US$900 million after a New Mexico judge significantly increased the financial penalty stemming from a landmark case over the company’s treatment of young users. State Judge Bryan Biedscheid ruled on...</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 1:43 AM UTC
+                </p>
+              </div>
+            </article>
+            
+          </div>
+          
+        </section>
+        
+        
+        
+        
+        <section class="ticker-section">
+          <div class="ticker-header">
+            
+            <div>
+              <span class="ticker-name">IAU</span>
+              
+              <span class="price">$79.87</span>
+              
+              <span class="change up">
+                +0.03%
+              </span>
+              
+              
+            </div>
+          </div>
+
+          
+          <div class="story-list">
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1458722383/image_1458722383.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=5c096420100a6edee8392791e23fafae131cbaf76ed461d264e3f42a1668ab57" target="_blank" rel="noopener">From Environmental Liability To Economic Asset: A Case For Tailings Reprocessing</a></h3>
+                
+                <p class="summary">Mining industry is facing a rising demand for metals, particularly those critical to the energy transition, while the quality of primary ore bodies is in long-term decline. Read more here.</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 7 Aug 2026, 6:30 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2230969519/image_2230969519.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=80d82dbd8a9865ec3e7991bf8e52dd70ed269b78e91d06507952a4d20d3a9146" target="_blank" rel="noopener">Why Gold Miners Are More Resilient Than Their Costs Suggest</a></h3>
+                
+                <p class="summary">Gold held above $4,000 in July while miners faced volatility, but record margins suggest cost fears may be overstated. Read more here.</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 7 Aug 2026, 3:10 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2284259815/image_2284259815.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=ee0b9f1a211e73d277ac0f656910670d7a4ae5768b08dcf8bc1aaa46243695b7" target="_blank" rel="noopener">Why Flat Gold During Inflation Points To Fed Action</a></h3>
+                
+                <p class="summary">The recurring pattern of flat or declining gold during inflationary periods has historically signaled that markets are already pricing in a tightening shift in Fed policy.</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 6 Aug 2026, 11:25 PM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2253483245/image_2253483245.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=fd02c5e61cc1f4e00334a10e8eeca0668d4e9c201ac4fba34e5baf2ace28d6db" target="_blank" rel="noopener">Precious Metals Sector Major New Uptrend Alert (Technical Analysis)</a></h3>
+                
+                <p class="summary">Various factors are converging, which suggest that the Precious Metals sector is about to break out into a major new uptrend, and it looks like we have waited long enough.</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 6 Aug 2026, 2:55 PM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2219056031/image_2219056031.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=0516e962a40a8ae8ffadce6b019d6401fe5874efcd5c51c5987c5e534a1a727f" target="_blank" rel="noopener">The Great Gold Reset Is Over</a></h3>
+                
+                <p class="summary">Gold&#39;s recent surge defies traditional interest rate correlations, signaling structural demand. Read why potential rate cuts could act as catalysts.</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 6 Aug 2026, 10:18 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2256126155/image_2256126155.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=bc7be4d27856c387b53c56012afb963fc84564b3e2741741ded81db0d95d7228" target="_blank" rel="noopener">Gold ETF Flows: July 2026</a></h3>
+                
+                <p class="summary">Global investors added gold ETFs back to their portfolios in July, resulting in US$3bn net inflows, led by European funds.</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 6 Aug 2026, 9:52 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2266681879/image_2266681879.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=aca67d95217de391df48a67bffe01a1eb9ff60627c81cc9f7c215ecd1522538b" target="_blank" rel="noopener">Gold Market Commentary: Making Waves</a></h3>
+                
+                <p class="summary">Positive momentum factors offset negative risk factors to leave gold prices unchanged in July. Read more here.</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 6 Aug 2026, 9:20 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1472696526/image_1472696526.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=1e9027246aae8e2f958b60c221d2ca1f9867d77391bd59c9f1ca92fcf7b63850" target="_blank" rel="noopener">Gold Rallies On Shift In Dollar Policy</a></h3>
+                
+                <p class="summary">Gold closed up 4.1% on Wednesday. In terms of historical one-day price changes, we&#39;ve only seen three episodes like this since 2019. So, what is today&#39;s outsized move in gold about?</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 6 Aug 2026, 9:05 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/120909610/image_120909610.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=9231135a0f3c505294b194a21da838d2b23d97f97a0dfccad12986d7bca8df45" target="_blank" rel="noopener">The World Has Changed - Portfolio Construction Should Too</a></h3>
+                
+                <p class="summary">AI winners keep shifting; bet on physical infrastructure, real assets, and diversification over any single tech name. Read more here.</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 6 Aug 2026, 1:15 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/525969608/image_525969608.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=751683d5e442075dff7a012bc74fb8c4f3f7ecd9f67d9a7b1ef8f06354f3831f" target="_blank" rel="noopener">Commodities: Oil Under Pressure As Iran And Oman Reach Hormuz Deal</a></h3>
+                
+                <p class="summary">ICE Brent continues to trade below $80/bbl as the market pins its hopes on a deal between the US and Iran.</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 6 Aug 2026, 12:35 AM UTC
+                </p>
+              </div>
+            </article>
+            
+          </div>
+          
+        </section>
+        
+        
+        
+        
+        <section class="ticker-section">
+          <div class="ticker-header">
+            
+            <img class="logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/GOOG.png" alt="GOOGL">
+            
+            <div>
+              <span class="ticker-name">GOOGL</span>
+              
+              <span class="price">$357.75</span>
+              
+              <span class="change down">
+                -1.29%
+              </span>
+              
+              
+            </div>
+          </div>
+
+          
+          <div class="story-list">
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=a25c345a2bf581d92f29fbaf7cd5d7a98754e33684e5a86739134b34e9233be1" target="_blank" rel="noopener">Amazon CEO Andy Jassy Just Gave Investors 220 Billion Reasons to Buy Micron Stock</a></h3>
+                
+                <p class="summary">Amazon just raised its artificial intelligence (AI) budget to $220 billion, up from a prior estimate of $200 billion.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 9:20 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://www.chartmill.com/images/uploads/THUMBNAILS_CHARTMILL_1000_528_91_f2c0771a33.webp" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=c42e3831622718b4f9a1ba0e6c62cc5085b39b425b74d855b0adf96ae23b213e" target="_blank" rel="noopener">Oil Price Spoils the Party on Wall Street, Memory Chips Take a Hard Hit</a></h3>
+                
+                <p class="summary">A nearly 5 percent jump in Brent crude pushed U.S. yields higher and put the recent rally on pause. Memory chip stocks corrected sharply despite better-than-expected quarterly results.</p>
+                
+                <p class="meta">
+                  ChartMill
+                   · 7 Aug 2026, 7:46 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=ace76c22af42fc5516268dd0f9a0a2bfce4c87a2ca22404fd54b8594cd824027" target="_blank" rel="noopener">Michael Burry Shares &#39;Three Great Charts&#39; That Show Big AI Capex Could Unwind As Badly As Housing Did In 2008</a></h3>
+                
+                <p class="summary">Cloud companies’ capex would run at roughly 3% of the U.S. GDP every year from 2027 to 2029, up from 0.3% of GDP in 2019 and 1.4% in 2025, according to a top economist.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 5:48 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=127ccb6ff769aa61f0abcc7f3154d9301e12d8393f032da162e3156c689a49f8" target="_blank" rel="noopener">What Block (SQ)&#39;s Buyback Completion And Google AI Tie-Up Means For Shareholders</a></h3>
+                
+                <p class="summary">In early August 2026, Block reported second-quarter revenue of US$6,617.69 million with net income of US$88.52 million, while also completing a multi-year US$4.43 billion share repurchase program that retired 11.03% of its stock. A day later, Google announced an expanded collaboration with Square that plugs food and beverage sellers directly into Ask Maps and Order by Cash App, tying Block’s payments ecosystems more tightly into everyday AI-driven restaurant discovery and ordering. Next,...</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 5:16 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=3c8475d010eeb292a5a164fa8c3070047dec1571403aafb605fc20afb8feacd3" target="_blank" rel="noopener">Is Broadcom the Best Chip Stock to Own Now? Maybe</a></h3>
+                
+                <p class="summary">Broadcom sits at a tollbooth on the AI buildout, and one look at its order book raises a question worth asking: why are so many chip investors still looking elsewhere?</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 4:57 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=98721180ef16b1b076d6ff39557b71f273fddf371e4f5415691ae9e49f5a44aa" target="_blank" rel="noopener">Alphabet and Tesla: A Single Divergence Tells Us So Much About Current Reality</a></h3>
+                
+                <p class="summary">Alphabet and Tesla both reported earnings the same day, both burned billions on AI, and both are chasing the same future. So why did the market punish one and reward the other?</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 4:50 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=c5d21850e45b332b8a9f633b2086e774a8eee721923745bc549ddc740937164a" target="_blank" rel="noopener">Earnings Have Been Excellent. Why Stocks Aren’t Showing It.</a></h3>
+                
+                <p class="summary">A mix of high expectations, profit-taking, and a slight dip in valuations has sent S&amp;P 500 stocks sputtering even after solid earnings reports.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 4:30 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=6d6227310610ca8d6a194360bb69536371e69bf30e11cffb51d577b3879fb1f5" target="_blank" rel="noopener">Where to Invest in AI in 2026: A Guide for Advisors</a></h3>
+                
+                <p class="summary">Where to invest in AI in 2026? Experts from J.P. Morgan, Pictet &amp; Chantico break down AI stocks, ETFs, capex trends, and portfolio strategies for advisors.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 3:00 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=1a7849525fd0b43a4f825134a3b9128fd994747ff7208632d9236eee6097dc8d" target="_blank" rel="noopener">Exclusive-Alibaba plans to charge big users of its next open-source AI model, sources say</a></h3>
+                
+                <p class="summary">Chinese technology giant Alibaba plans to ask major users of the next version of its Qwen open-source AI model for a share of revenue they make from the hotly anticipated offering, according to two people familiar with the company&#39;s plans.  Like last ‌month&#39;s blockbuster model release from Chinese AI startup Moonshot, Alibaba&#39;s Qwen3.8-Max model is an open-source, open-weight model, meaning that the underlying learned settings that ‌allow developers to run or adapt the system are available for download.  Open source is often thought of as free, but tucked into ​the licensing terms of Moonshot&#39;s Kimi K3 was a provision that requires anyone offering the model for sale as a service and generating more than $20 million in annual sales to work out a commercial agreement with Moonshot.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 1:04 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=53de68a19dcac910f8f3a58efea42c5221cc32e18e30af771d19437d6abf0eef" target="_blank" rel="noopener">Jamie Dimon makes huge call on AI and U.S. economy</a></h3>
+                
+                <p class="summary">AI CapEx fatigue continues to sour investors as hyperscalers shell out billions on data centers, chips, and power infrastructure without a clear timetable for returns. Wall Street’s been bracing for evidence of the spending boom being a drag on margins, free cash flows, and earnings. Some of the ...</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 12:37 AM UTC
+                </p>
+              </div>
+            </article>
+            
+          </div>
+          
+        </section>
+        
+        
+        
+        
+        <section class="ticker-section">
+          <div class="ticker-header">
+            
+            <img class="logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/AMZN.png" alt="AMZN">
+            
+            <div>
+              <span class="ticker-name">AMZN</span>
+              
+              <span class="price">$272.26</span>
+              
+              <span class="change down">
+                -0.14%
+              </span>
+              
+              
+            </div>
+          </div>
+
+          
+          <div class="story-list">
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=a25c345a2bf581d92f29fbaf7cd5d7a98754e33684e5a86739134b34e9233be1" target="_blank" rel="noopener">Amazon CEO Andy Jassy Just Gave Investors 220 Billion Reasons to Buy Micron Stock</a></h3>
+                
+                <p class="summary">Amazon just raised its artificial intelligence (AI) budget to $220 billion, up from a prior estimate of $200 billion.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 9:20 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2175391938/image_2175391938.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=e92b3c3049aa25a811dd47df646c220eb681f8b3be5447c48c2834f347f6386d" target="_blank" rel="noopener">Amazon: Stronger AWS Growth Meets A Much Heavier Investment Cycle</a></h3>
+                
+                <p class="summary">Amazon&#39;s AWS reaccelerated to 37% revenue growth and 39.4% margin, driving 61% of Q2 operating income. Learn why AMZN stock is a buy.</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 7 Aug 2026, 6:01 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=ace76c22af42fc5516268dd0f9a0a2bfce4c87a2ca22404fd54b8594cd824027" target="_blank" rel="noopener">Michael Burry Shares &#39;Three Great Charts&#39; That Show Big AI Capex Could Unwind As Badly As Housing Did In 2008</a></h3>
+                
+                <p class="summary">Cloud companies’ capex would run at roughly 3% of the U.S. GDP every year from 2027 to 2029, up from 0.3% of GDP in 2019 and 1.4% in 2025, according to a top economist.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 5:48 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=1e456129dced02b4e9f84aef8b453ed9d8cd2fa987505ab4b9827ac901d21904" target="_blank" rel="noopener">July 2026 Mailbag: Year 12 Begins</a></h3>
+                
+                <p class="summary">The podcast hands the microphone back to the people who have helped shape it from the very beginning: its listeners.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 4:38 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=1579706d031c269f14b86d4f6a2eb8f0b16aad4d891e259cf5f109228fd63305" target="_blank" rel="noopener">How Do UPS’s New SMB Tools And Steady Dividend Shape Its Long‑Term Investment Story (UPS)?</a></h3>
+                
+                <p class="summary">In late July and early August 2026, United Parcel Service, Inc. rolled out new digital shipping tools for small and medium-sized businesses and confirmed a regular quarterly dividend of US$1.64 per share, payable on September 3, 2026, to shareowners of record on August 17, 2026. The enhanced pickup dashboard, streamlined label creation and upgraded mobile app underline UPS’s push to deepen ties with smaller business shippers while maintaining its shareholder income profile. Next, we’ll...</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 4:29 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=6d6227310610ca8d6a194360bb69536371e69bf30e11cffb51d577b3879fb1f5" target="_blank" rel="noopener">Where to Invest in AI in 2026: A Guide for Advisors</a></h3>
+                
+                <p class="summary">Where to invest in AI in 2026? Experts from J.P. Morgan, Pictet &amp; Chantico break down AI stocks, ETFs, capex trends, and portfolio strategies for advisors.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 3:00 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=53de68a19dcac910f8f3a58efea42c5221cc32e18e30af771d19437d6abf0eef" target="_blank" rel="noopener">Jamie Dimon makes huge call on AI and U.S. economy</a></h3>
+                
+                <p class="summary">AI CapEx fatigue continues to sour investors as hyperscalers shell out billions on data centers, chips, and power infrastructure without a clear timetable for returns. Wall Street’s been bracing for evidence of the spending boom being a drag on margins, free cash flows, and earnings. Some of the ...</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 12:37 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2223715503/image_2223715503.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=f1f73534cf7e3e40d71b94d7296363b4b05826a2d9014c0ad6219c7b224551b1" target="_blank" rel="noopener">Credit Says The Capital Goods Recession Story Doesn&#39;t Hold Up</a></h3>
+                
+                <p class="summary">Every market shock produces a story fast enough to explain it, and the story that formed around Julyâs selloff was a good one</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 7 Aug 2026, 12:20 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=67c07b29c4f732167c4b24d4f3f40141f62eb17e87fecfaf2b765b5274507819" target="_blank" rel="noopener">The Data Center Boom Is Powering Utility Earnings. Here Is My Favorite Way to Play the Trend.</a></h3>
+                
+                <p class="summary">Utility companies are increasingly benefiting from the AI data center boom, and here is my favorite way to gain exposure to this investment theme.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 6 Aug 2026, 11:30 PM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=ad63021994872e2f13565ecfef0e9243af7f071fc83de04ea82acd9b305ec342" target="_blank" rel="noopener">Bezos’s $4 Billion Amazon Sale Was Scheduled Before the Earnings Beat</a></h3>
+                
+                <p class="summary">Bezos sold $4.07 billion in Amazon stock this week, but the sale plan was set eight months before the earnings beat.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 6 Aug 2026, 10:46 PM UTC
+                </p>
+              </div>
+            </article>
+            
+          </div>
+          
+        </section>
+        
+        
+        
+        
+        <section class="ticker-section">
+          <div class="ticker-header">
+            
+            <img class="logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/NVDA.png" alt="NVDA">
+            
+            <div>
+              <span class="ticker-name">NVDA</span>
+              
+              <span class="price">$218.99</span>
+              
+              <span class="change down">
+                -0.10%
+              </span>
+              
+              
+            </div>
+          </div>
+
+          
+          <div class="story-list">
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=a06d3074fa0460f08448107577c397da403af8ddd610e4609182cbd8dfe9a202" target="_blank" rel="noopener">Warren Buffett&#39;s Successor, Greg Abel, Has 63% of Berkshire Hathaway&#39;s $355 Billion Portfolio Invested in Just 5 Standout Stocks</a></h3>
+                
+                <p class="summary">More than $222 billion of Berkshire&#39;s invested assets are concentrated in Abel&#39;s and Buffett&#39;s best ideas.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 9:26 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=a25c345a2bf581d92f29fbaf7cd5d7a98754e33684e5a86739134b34e9233be1" target="_blank" rel="noopener">Amazon CEO Andy Jassy Just Gave Investors 220 Billion Reasons to Buy Micron Stock</a></h3>
+                
+                <p class="summary">Amazon just raised its artificial intelligence (AI) budget to $220 billion, up from a prior estimate of $200 billion.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 9:20 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=06466d4cd5f07466994a6bd0a62dc6d1a266144dee00083110a9ba5bb679810c" target="_blank" rel="noopener">What Would Have to Go Wrong for Realty Income to Cut Its Dividend?</a></h3>
+                
+                <p class="summary">Here&#39;s how this top REIT&#39;s 31-year streak of dividend hikes could come to a screeching halt.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 9:04 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=269bb5d3830d535f1d90fe5d7131ab3419e895cb563e31c74c5194d41b4cfff3" target="_blank" rel="noopener">Here&#39;s the 1 Habit That Has Helped Ordinary Investors Build Extraordinary Wealth in the Stock Market</a></h3>
+                
+                <p class="summary">A simple adjustment can lead to fantastic returns.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 8:51 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=4e9fdede15382df297c6fa5dd483ba5fd794a0b3c9a1622177bfae4b046421d4" target="_blank" rel="noopener">Cisco Raised Its AI Order Target to $9 Billion. Here&#39;s What Investors Need to Know.</a></h3>
+                
+                <p class="summary">AI infrastructure orders could more than quadruple in fiscal 2026. So why is revenue guided to grow just 11%?</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 8:43 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=d8a6bcf3ff14c756aa420c128b1e821b5f0b29f9893e4a77f873fe10e574aa48" target="_blank" rel="noopener">No Forward-Looking Guidance Needed: Fed Chair Kevin Warsh Just Outlined His Inflation Plan in 9 Words</a></h3>
+                
+                <p class="summary">The bond market is telling quite a tale for those willing to listen.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 8:26 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=aa7ccd9ed66ee8cb1683c65cb39f8c011a22bf8ea3ec09ae7cf6dc3def8fde91" target="_blank" rel="noopener">Mark Zuckerberg&#39;s Net Worth Swung by Double-Digit Billions Twice This Summer as Meta&#39;s AI Spending Divides Wall Street. Here&#39;s What the Volatility Signals for Investors.</a></h3>
+                
+                <p class="summary">Zuckerberg&#39;s fortune swung by tens of billions, but the real story is what Meta&#39;s AI spending means for every investor holding the stock.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 8:15 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=51a0db20dabaa34d946cb141ae5ff418cb25bba0c66739bfaa1a9e55fd8ab325" target="_blank" rel="noopener">SNDK, WDC Rout Tests Chip Rally — Roundhill CEO Says ‘Beat And Raise Is Not Enough’ As Investors Return To NVDA</a></h3>
+                
+                <p class="summary">Roundhill CEO Dave Mazza called the memory pullback a leverage-driven “shakeout and repositioning,” even as DRAM attracted fresh inflows.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 8:14 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=9e84382c4b17aa7768ac1dca7ba015f4349d53d34d37f783b160ad5b6b9af929" target="_blank" rel="noopener">Ooredoo invests $800m in Indonesian AI neocloud platform Zankore</a></h3>
+                
+                <p class="summary">The company will take a 49% stake in Zankore, targeting AI-driven data centre growth across Southeast Asia.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 8:10 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=18f3cfeeee7e9909a154cbd4152ff938bdcda5695c725a8b54a897dc090d4f35" target="_blank" rel="noopener">SpaceX Shares Fail to Launch Despite Soaring Revenue. Is the Stock a Buy on the Dip?</a></h3>
+                
+                <p class="summary">SpaceX turned in a solid quarter, but headwinds remain.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 7:25 AM UTC
+                </p>
+              </div>
+            </article>
+            
+          </div>
+          
+        </section>
+        
+        
+        
+        
+        <section class="ticker-section">
+          <div class="ticker-header">
+            
+            <img class="logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/MSFT.png" alt="MSFT">
+            
+            <div>
+              <span class="ticker-name">MSFT</span>
+              
+              <span class="price">$499.86</span>
+              
+              <span class="change up">
+                +2.54%
+              </span>
+              
+              
+            </div>
+          </div>
+
+          
+          <div class="story-list">
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=2eed0e22d6951bd85db5cebef1c6701a751b22f0fa594db103b10d052ba3f5e6" target="_blank" rel="noopener">Digital Twins in Healthcare Global Market Report 2026 | Profiles Microsoft, Siemens Healthineers, Philips, AWS, and 21 Other Players</a></h3>
+                
+                <p class="summary">Digital Twins in Healthcare Market Digital Twins in Healthcare Market Dublin, Aug. 07, 2026 (GLOBE NEWSWIRE) -- The &#34;Digital Twins in Healthcare Market by Component, Application, End User, and Region - Global Forecast to 2031&#34; has been added to ResearchAndMarkets.com&#39;s offering. The global digital twin in healthcare market is entering a period of substantial expansion, supported by increasing adoption across clinical care, medical research, surgical planning and healthcare facility management. T</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 9:48 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=a25c345a2bf581d92f29fbaf7cd5d7a98754e33684e5a86739134b34e9233be1" target="_blank" rel="noopener">Amazon CEO Andy Jassy Just Gave Investors 220 Billion Reasons to Buy Micron Stock</a></h3>
+                
+                <p class="summary">Amazon just raised its artificial intelligence (AI) budget to $220 billion, up from a prior estimate of $200 billion.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 9:20 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=c86551dad7d60c2183d9858f8626ea2e37df7846738b2c0672a016cf89b32bd0" target="_blank" rel="noopener">Microsoft makes a controversial decision that changes its AI story</a></h3>
+                
+                <p class="summary">Microsoft spends billions building its own AI models every year. Internally, though, the company just told its own developers to reach for someone else&#39;s technology first. The instruction came from deep inside Microsoft&#39;s engineering organization, and it says as much about the economics of AI ...</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 9:03 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=ace76c22af42fc5516268dd0f9a0a2bfce4c87a2ca22404fd54b8594cd824027" target="_blank" rel="noopener">Michael Burry Shares &#39;Three Great Charts&#39; That Show Big AI Capex Could Unwind As Badly As Housing Did In 2008</a></h3>
+                
+                <p class="summary">Cloud companies’ capex would run at roughly 3% of the U.S. GDP every year from 2027 to 2029, up from 0.3% of GDP in 2019 and 1.4% in 2025, according to a top economist.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 5:48 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=6af61f4149856b962e7d5a269047765664d6164a15d4b600309cd9bb1cd14333" target="_blank" rel="noopener">The Core Bull Thesis Around Microsoft Remains Very Strong at $500</a></h3>
+                
+                <p class="summary">Microsoft just reported a blockbuster quarter with Azure crossing milestones few saw coming, yet the stock sits flat on the year and prediction markets give it a coin-flip chance of holding $500 through the week. Here is what the numbers reveal about who is right.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 4:39 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=6d6227310610ca8d6a194360bb69536371e69bf30e11cffb51d577b3879fb1f5" target="_blank" rel="noopener">Where to Invest in AI in 2026: A Guide for Advisors</a></h3>
+                
+                <p class="summary">Where to invest in AI in 2026? Experts from J.P. Morgan, Pictet &amp; Chantico break down AI stocks, ETFs, capex trends, and portfolio strategies for advisors.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 3:00 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=cdb6022ea065ec85d1ffe6c237d8032c30a5d9e3eaab02be4c99c0561954f22d" target="_blank" rel="noopener">Five9 Q2 Earnings Call Highlights</a></h3>
+                
+                <p class="summary">Five9 (NASDAQ:FIVN) reported second-quarter 2026 revenue of $312 million, up 10% from a year earlier and above the high end of its guidance range, as accelerating artificial intelligence revenue helped drive subscription growth. Subscription revenue rose 14% year over year, marking a third consecut</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 2:03 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=fc20dcbede2ce6d6d8d22727379e746dbfa504ebe3f6374be94d023d79177a23" target="_blank" rel="noopener">2 Energy Stocks With More Hype Than Fundamentals Right Now</a></h3>
+                
+                <p class="summary">High expectations leave little room for disappointment.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 12:25 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/2223715503/image_2223715503.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=f1f73534cf7e3e40d71b94d7296363b4b05826a2d9014c0ad6219c7b224551b1" target="_blank" rel="noopener">Credit Says The Capital Goods Recession Story Doesn&#39;t Hold Up</a></h3>
+                
+                <p class="summary">Every market shock produces a story fast enough to explain it, and the story that formed around Julyâs selloff was a good one</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 7 Aug 2026, 12:20 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=67c07b29c4f732167c4b24d4f3f40141f62eb17e87fecfaf2b765b5274507819" target="_blank" rel="noopener">The Data Center Boom Is Powering Utility Earnings. Here Is My Favorite Way to Play the Trend.</a></h3>
+                
+                <p class="summary">Utility companies are increasingly benefiting from the AI data center boom, and here is my favorite way to gain exposure to this investment theme.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 6 Aug 2026, 11:30 PM UTC
+                </p>
+              </div>
+            </article>
+            
+          </div>
+          
+        </section>
+        
+        
+        
+        
+        <section class="ticker-section">
+          <div class="ticker-header">
+            
+            <img class="logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/NFLX.png" alt="NFLX">
+            
+            <div>
+              <span class="ticker-name">NFLX</span>
+              
+              <span class="price">$73.69</span>
+              
+              <span class="change down">
+                -0.69%
+              </span>
+              
+              
+            </div>
+          </div>
+
+          
+          <div class="story-list">
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=2945eb85c1e40404144388fc3922030d51c77e43655bc7b09bbaaf7c2d056057" target="_blank" rel="noopener">Netflix (NFLX) Stock May Be 26% Undervalued Despite New Franchise Rights</a></h3>
+                
+                <p class="summary">Netflix stock has had a strong run over the past three years, yet current checks still point to a discount, with both its Discounted Cash Flow (DCF) intrinsic value estimate and market multiples indicating the shares may be pricing in less than the modelled cash flows. Over the past 3 years, Netflix has returned about 71%, which puts the recent share price weakness into context as a pullback after a longer period of gains. The multi year licensing deal for The Walking Dead Universe can...</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 6 Aug 2026, 11:15 PM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://static.seekingalpha.com/cdn/s3/uploads/getty_images/1318776826/image_1318776826.jpg?io=getty-c-w1536" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=e4e14ccbf7af0c8c6ec733507d7d7966d1ad1045f756c55ff393f45f475b8901" target="_blank" rel="noopener">Tracking Baillie Gifford&#39;s 13F Portfolio - Q2 2026 Update</a></h3>
+                
+                <p class="summary">Baillie Gifford Q2 2026 13F: portfolio grew to $110B; SpaceX IPO (SPCX) tops holdings, NVDA added, AMZN trimmed. Read more analysis here.</p>
+                
+                <p class="meta">
+                  SeekingAlpha
+                   · 6 Aug 2026, 8:54 PM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=f9907a90a06861680bca96cac6f7aca091431a640b669e86e7e875c62a0b81d0" target="_blank" rel="noopener">Get Paid 10% To Cap Your DIS Stock At 8.1% Higher</a></h3>
+                
+                <p class="summary">For Walt Disney shareholders, here is a way to get paid a meaningful income now, money you keep no matter what, in exchange for agreeing to sell your stock at a higher price if it gets there.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 6 Aug 2026, 8:46 PM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=0568cc498d4de1f6bef96f4b3f764b6fa3c12b2457c9f71ffc2c2662f497dcfa" target="_blank" rel="noopener">Netflix&#39;s Latest Insider Sale Looks Bigger Than It Is</a></h3>
+                
+                <p class="summary">A director plans to sell 2,160 shares under a previously arranged trading plan.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 6 Aug 2026, 7:55 PM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=92ef598f1f84b5c487d1279b09d191167e24a1d49d1d288ff760ba12d8116708" target="_blank" rel="noopener">PancakeSwap Expands Tokenized Equity Offerings with 10 New &#39;bStocks&#39; on BNB Chain</a></h3>
+                
+                <p class="summary">Decentralized crypto exchange PancakeSwap (CRYPTO: $CAKE) expanded its tokenized equities offering on Thursday, lis...</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 6 Aug 2026, 6:12 PM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <img src="https://www.chartmill.com/images/uploads/CM_Most_Active_Stocks_Small_free_fec0650b7f.webp" alt="">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=1baa164f5b5a34580123a837cb4c226634687b4219d9917685e1740b006dfa56" target="_blank" rel="noopener">Curious about the most active S&amp;P500 stocks in today&#39;s session?</a></h3>
+                
+                <p class="summary">Let&#39;s have a look at what is happening on the US markets on Thursday. Below you can find the most active S&amp;P500 stocks in today&#39;s session.</p>
+                
+                <p class="meta">
+                  ChartMill
+                   · 6 Aug 2026, 6:05 PM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=0be1ce37a3db0f6647ffee390bf3dbc22d3a32e72c83afc079251324fea2d86e" target="_blank" rel="noopener">Netflix Killed Cable TV. Now the Streaming Giant Wants to Bring It Back.</a></h3>
+                
+                <p class="summary">Netflix spent two decades trying to convince us all that cable TV was a waste of money. Now, the company is considering taking us back in time with the launch of its new, always-on TV channels.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 6 Aug 2026, 5:55 PM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=90ad9d19a1b87ca0e25ed1ff9ebe00a23823a1643fca14a42799ccb92b62df04" target="_blank" rel="noopener">Netflix and MercadoLibre Are Underperforming the S&amp;P 500. Here&#39;s the 1 Stock I&#39;d Buy in August.</a></h3>
+                
+                <p class="summary">I own both stocks already, but there&#39;s only one on my short list of buy candidates this month.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 6 Aug 2026, 5:37 PM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=18c204a1aa3f18337d8e5a000316bc381b4d6b3278a5210e4e33f200841a95b2" target="_blank" rel="noopener">Netflix and Disney Are Exploring Free, Ad-Supported Tiers</a></h3>
+                
+                <p class="summary">Netflix and Disney are exploring free ad-supported streaming tiers, but expect limited content while the best shows stay locked behind a paywall.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 6 Aug 2026, 5:28 PM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=91cc4ad6877748990ee5c4b8647b35553a0f18d0bf803c1f56b88e51bbe76fa4" target="_blank" rel="noopener">Warner Bros. Posts Surprise Quarterly Profit Amid Streaming Gains; Paramount Deal Gets UK Clearance</a></h3>
+                
+                <p class="summary">Warner Bros. Discovery (WBD) reported a surprise second-quarter profit on Thursday amid double-digit</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 6 Aug 2026, 2:29 PM UTC
+                </p>
+              </div>
+            </article>
+            
+          </div>
+          
+        </section>
+        
+        
+        
+        
+        <section class="ticker-section">
+          <div class="ticker-header">
+            
+            <img class="logo" src="https://static2.finnhub.io/file/publicdatany/finnhubimage/stock_logo/TSLA.png" alt="TSLA">
+            
+            <div>
+              <span class="ticker-name">TSLA</span>
+              
+              <span class="price">$319.53</span>
+              
+              <span class="change down">
+                -0.63%
+              </span>
+              
+              
+            </div>
+          </div>
+
+          
+          <div class="story-list">
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=b47145f70e62b17276f9181ca852b98ffbb25245cc81a8d4158e3d65e6b8a385" target="_blank" rel="noopener">Elon Musk’s Terafab Will Be Earth’s Most Valuable Building, 50x the Size of the Pentagon</a></h3>
+                
+                <p class="summary">Elon Musk says his Terafab chip factory will become Earth&#39;s most valuable building, spanning 9 million square meters.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 7:43 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=858e27613e37dd146ee55524d56f32bb0369f30ff9b7e0888035133686e0a2e7" target="_blank" rel="noopener">SpaceX (SPCX) Unveils Orbital AI Network And $16.8 Billion Chip Factory Plans</a></h3>
+                
+                <p class="summary">Space Exploration Technologies (NasdaqGS: SPCX) unveils Starmind, an orbital AI data center network built with Nvidia, targeting space based compute and data services. Tesla and SpaceX announce plans for a US$16.8b Terafab AI chip factory in Texas to expand AI hardware production capacity. SpaceX outlines intentions to build a terrestrial mobile network that would compete with major U.S. wireless carriers. These moves push SpaceX deeper into AI infrastructure and telecom, so it can be...</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 5:14 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=150ab5c274f50f32ba7dc1d0b62589d098a4a241ab233f45d9d41f8e6740aed8" target="_blank" rel="noopener">The New Wild West: Texas Experiments With Raw Capitalism</a></h3>
+                
+                <p class="summary">The state’s light requlation and low taxes are luring dozens of big companies. It’s also setting up a water crisis and a “race to the bottom” in shareholder protections.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 5:00 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=cc3152641383d86483619bb675b5044935bba39a50e92232999cc8789a73fa3c" target="_blank" rel="noopener">‘Shark Tank’ Judge Kevin O’Leary Passed On SpaceX IPO, But May Buy Soon: ‘The Bigger Opportunity Is…’</a></h3>
+                
+                <p class="summary">SPCX stock climbed 6% on Thursday despite 911.5 million shares becoming eligible for sale after a lockup expired.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 4:56 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=98721180ef16b1b076d6ff39557b71f273fddf371e4f5415691ae9e49f5a44aa" target="_blank" rel="noopener">Alphabet and Tesla: A Single Divergence Tells Us So Much About Current Reality</a></h3>
+                
+                <p class="summary">Alphabet and Tesla both reported earnings the same day, both burned billions on AI, and both are chasing the same future. So why did the market punish one and reward the other?</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 4:50 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=bf86a14487790b8e0d808c618e136f01fb7ce1c72909afb266c436817dd2c96f" target="_blank" rel="noopener">Elon Musk Says SpaceX Will Consume Three Times More Terafab AI Compute Than Tesla</a></h3>
+                
+                <p class="summary">Tesla Inc. (NASDAQ:TSLA) and Space Exploration Technologies Corp. (NASDAQ:SPCX) CEO Elon Musk says that the new Terafab semiconductor manufacturing facility in Grimes County, Texas, will serve both the Optimus robot and SpaceX’s “AI spacecraft”. Elon Musk’s Approximate Guesses On Thursday, the Tesla Owners Silicon Valley handle on X shared a promotional video of the Terafab facility, saying that the site will “produce over 1 terawatt of AI compute capacity per year” and that it would be a crucia</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 4:42 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=5215e0c1734e04b8ac41968eb99ffe1e513af36b6a61881065ff6115b6fd605e" target="_blank" rel="noopener">TSLA Stock Eyes Weekly Comeback As Elon Musk Touts Terafab’s Colossal Scale — Analyst Flags A Big Intel Question Mark</a></h3>
+                
+                <p class="summary">Musk said the completed complex would be 50 times the Pentagon’s size and can support over one terawatt of compute demand.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 3:12 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=9580dfc476605b944309badbd7ef5621f279037e47107f6a7d4e333a5d10ef65" target="_blank" rel="noopener">SpaceX and Tesla Merger Talks Are Heating Up. Here&#39;s Why Investors Should Pay Attention.</a></h3>
+                
+                <p class="summary">Elon Musk has a lot to gain from a potential megamerger.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 2:50 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=15e79e1f6e244256b5514528c7052c7b1f2e1f20ccbe2513d71cca13bfc74e3f" target="_blank" rel="noopener">Ford&#39;s first $30,000 shot at increasing U.S. EV demand has a name</a></h3>
+                
+                <p class="summary">Ford has been losing billions on its electric vehicle ambitions for years, so the company has switched gears. Instead of making high-end EVs that cost a lot more than its gas-powered and hybrid offerings, Ford decided to go the other way and target EVs that are affordable. It&#39;s a strategy that has ...</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 7 Aug 2026, 1:37 AM UTC
+                </p>
+              </div>
+            </article>
+            
+            <article class="story">
+              
+              <div class="story-body">
+                <h3><a href="https://finnhub.io/api/news?id=1982c5bf89e8796ff590a2776d739c0d3115380f06fd6965fdf7a5732b35a7d9" target="_blank" rel="noopener">Prediction: Tesla&#39;s Share Price Dip Will Prove an Excellent Buying Opportunity</a></h3>
+                
+                <p class="summary">Investors were focused on the robotaxi rollout in terms of fleet size and the number of cities, but management has hopefully reset expectations now.</p>
+                
+                <p class="meta">
+                  Yahoo
+                   · 6 Aug 2026, 10:20 PM UTC
+                </p>
+              </div>
+            </article>
+            
+          </div>
+          
+        </section>
+        
+      </div>
+
+      <footer class="footer">
+        <p>9 tickers · 90 stories · stock-news-bot</p>
+        
+        <p><a href="https://parasdhawan17.github.io/stock-news-bot/archive/">View past digests</a></p>
+        
+      </footer>
+    </div>
+  </div>
+</body>
+</html>

@@ -5,85 +5,218 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stock News — {{ date_label }}</title>
 </head>
-<body style="margin:0;padding:0;background-color:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1a1a2e;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f8;padding:24px 12px;">
+<body style="margin:0;padding:0;background-color:#eef1f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1a1a2e;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#eef1f5;padding:24px 12px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
 
           <!-- Header -->
           <tr>
-            <td style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);padding:28px 32px;text-align:center;">
-              <p style="margin:0 0 6px;font-size:13px;color:#a0aec0;letter-spacing:1px;text-transform:uppercase;">Daily Digest</p>
-              <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#ffffff;">Stock News — {{ date_label }}</h1>
-              <p style="margin:0;font-size:14px;color:#cbd5e0;">{{ ticker_count }} tickers · {{ story_count }} stories</p>
+            <td style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);padding:32px 28px;text-align:center;">
+              <p style="margin:0 0 8px;font-size:11px;color:#94a3b8;letter-spacing:2px;text-transform:uppercase;font-weight:600;">Tickr Digest</p>
+              <h1 style="margin:0 0 10px;font-size:26px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">Stock News — {{ date_label }}</h1>
+              <p style="margin:0 0 6px;font-size:14px;color:#cbd5e1;">{{ ticker_count }} tickers · {{ story_count }} stories</p>
+              <p style="margin:0;font-size:13px;color:#94a3b8;">{{ market_summary.gainers }} up · {{ market_summary.losers }} down · {{ market_summary.flat }} flat</p>
+              {% if top_mover_label %}
+              <p style="margin:14px 0 0;font-size:13px;color:#e2e8f0;background-color:rgba(255,255,255,0.1);display:inline-block;padding:6px 14px;border-radius:20px;">Top mover today: <strong>{{ top_mover_label }}</strong></p>
+              {% endif %}
             </td>
           </tr>
 
-          <!-- Ticker sections -->
-          {% for section in sections %}
+          <!-- Movers strip -->
+          {% if movers_bar %}
           <tr>
-            <td style="padding:24px 32px 8px;border-top:1px solid #e8ecf0;">
+            <td style="padding:16px 20px;background-color:#f8fafc;border-bottom:1px solid #e8ecf0;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td>
-                    <span style="font-size:18px;font-weight:700;color:#1a1a2e;">{{ section.ticker }}</span>
-                    {% if section.quote %}
-                    <span style="font-size:16px;font-weight:600;color:#2d3748;margin-left:8px;">${{ "%.2f"|format(section.quote.price) }}</span>
-                    {% if section.quote.change_pct is not none %}
-                    <span style="font-size:14px;font-weight:600;margin-left:6px;color:{% if section.quote.change_pct >= 0 %}#16a34a{% else %}#dc2626{% endif %};">
-                      {% if section.quote.change_pct >= 0 %}+{% endif %}{{ "%.2f"|format(section.quote.change_pct) }}%
+                  {% for mover in movers_bar %}
+                  <td style="padding:3px;">
+                    <span style="display:inline-block;font-size:11px;font-weight:600;padding:5px 10px;border-radius:6px;white-space:nowrap;
+                      {% if mover.is_positive == true %}background-color:#dcfce7;color:#15803d;
+                      {% elif mover.is_positive == false %}background-color:#fee2e2;color:#b91c1c;
+                      {% else %}background-color:#f1f5f9;color:#64748b;{% endif %}">
+                      {{ mover.ticker }}{% if mover.change_pct is not none %} {% if mover.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(mover.change_pct) }}%{% endif %}
                     </span>
-                    {% endif %}
-                    {% endif %}
                   </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          {% if section.error %}
-          <tr>
-            <td style="padding:0 32px 16px;">
-              <p style="margin:0;font-size:14px;color:#718096;font-style:italic;">Could not fetch news for {{ section.ticker }}.</p>
-            </td>
-          </tr>
-          {% elif section.stories %}
-          {% for story in section.stories %}
-          <tr>
-            <td style="padding:8px 32px 16px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;border-radius:8px;border:1px solid #e8ecf0;">
-                <tr>
-                  {% if story.image %}
-                  <td width="120" style="vertical-align:top;padding:0;">
-                    <img src="{{ story.image }}" alt="" width="120" height="80" style="display:block;width:120px;height:80px;object-fit:cover;border-radius:8px 0 0 8px;">
-                  </td>
+                  {% if loop.index % 4 == 0 and not loop.last %}
+                </tr><tr>
                   {% endif %}
-                  <td style="vertical-align:top;padding:14px 16px;">
-                    <a href="{{ story.url }}" style="font-size:15px;font-weight:600;color:#1a56db;text-decoration:none;line-height:1.4;">{{ story.headline }}</a>
-                    {% if story.summary %}
-                    <p style="margin:6px 0 0;font-size:13px;color:#4a5568;line-height:1.5;">{{ story.summary }}</p>
-                    {% endif %}
-                    <p style="margin:8px 0 0;font-size:12px;color:#a0aec0;">{{ story.source }}{% if story.relative_time %} · {{ story.relative_time }}{% endif %}</p>
-                  </td>
+                  {% endfor %}
                 </tr>
               </table>
-            </td>
-          </tr>
-          {% endfor %}
-          {% else %}
-          <tr>
-            <td style="padding:0 32px 16px;">
-              <p style="margin:0;font-size:14px;color:#718096;font-style:italic;">No major news for {{ section.ticker }} today.</p>
             </td>
           </tr>
           {% endif %}
+
+          <!-- Hero: top mover -->
+          {% if hero %}
+          {% set hero_quote = hero.quote %}
+          {% set hero_positive = hero_quote and hero_quote.change_pct is not none and hero_quote.change_pct >= 0 %}
+          {% set hero_negative = hero_quote and hero_quote.change_pct is not none and hero_quote.change_pct < 0 %}
+          <tr>
+            <td style="padding:24px 24px 8px;">
+              <p style="margin:0 0 12px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#64748b;">Top Mover</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;border-left:4px solid {% if hero_positive %}#16a34a{% elif hero_negative %}#dc2626{% else %}#94a3b8{% endif %};">
+                <tr>
+                  <td style="padding:20px 20px 16px;background-color:#fafbfc;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        {% if hero.logo %}
+                        <td width="56" style="vertical-align:middle;padding-right:14px;">
+                          <img src="{{ hero.logo }}" alt="{{ hero.ticker }}" width="56" height="56" style="display:block;width:56px;height:56px;object-fit:contain;">
+                        </td>
+                        {% endif %}
+                        <td style="vertical-align:middle;">
+                          <span style="font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;">{{ hero.ticker }}</span>
+                          {% if hero_quote %}
+                          <span style="font-size:22px;font-weight:700;color:#1e293b;margin-left:10px;">${{ "%.2f"|format(hero_quote.price) }}</span>
+                          {% if hero_quote.change_pct is not none %}
+                          <span style="display:inline-block;font-size:14px;font-weight:700;margin-left:8px;padding:4px 10px;border-radius:6px;
+                            {% if hero_positive %}background-color:#dcfce7;color:#15803d;{% else %}background-color:#fee2e2;color:#b91c1c;{% endif %}">
+                            {% if hero_quote.change_pct >= 0 %}+{% endif %}{{ "%.2f"|format(hero_quote.change_pct) }}%
+                          </span>
+                          {% endif %}
+                          {% endif %}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                {% if hero.error %}
+                <tr>
+                  <td style="padding:0 20px 20px;">
+                    <p style="margin:0;font-size:14px;color:#718096;font-style:italic;">Could not fetch news for {{ hero.ticker }}.</p>
+                  </td>
+                </tr>
+                {% elif hero.stories %}
+                {% if hero.hero_image %}
+                <tr>
+                  <td style="padding:0;">
+                    <a href="{{ hero.stories[0].url }}" style="text-decoration:none;">
+                      <img src="{{ hero.hero_image }}" alt="" width="552" height="200" style="display:block;width:100%;max-width:552px;height:200px;object-fit:cover;">
+                    </a>
+                  </td>
+                </tr>
+                {% endif %}
+                {% for story in hero.stories %}
+                <tr>
+                  <td style="padding:{% if loop.first and not hero.hero_image %}16{% elif loop.first %}16{% else %}8{% endif %}px 20px {% if loop.last %}20{% else %}8{% endif %}px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;border:1px solid #e8ecf0;">
+                      <tr>
+                        {% if story.image and story.image != hero.hero_image %}
+                        <td width="100" style="vertical-align:top;padding:0;">
+                          <img src="{{ story.image }}" alt="" width="100" height="70" style="display:block;width:100px;height:70px;object-fit:cover;border-radius:8px 0 0 8px;">
+                        </td>
+                        {% endif %}
+                        <td style="vertical-align:top;padding:14px 16px;">
+                          <a href="{{ story.url }}" style="font-size:{% if loop.first %}17{% else %}15{% endif %}px;font-weight:600;color:#1d4ed8;text-decoration:none;line-height:1.4;">{{ story.headline }}</a>
+                          {% if story.summary %}
+                          <p style="margin:8px 0 0;font-size:13px;color:#475569;line-height:1.55;">{{ story.summary }}</p>
+                          {% endif %}
+                          <p style="margin:8px 0 0;font-size:11px;color:#94a3b8;">{{ story.source }}{% if story.relative_time %} · {{ story.relative_time }}{% endif %}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                  <td style="padding:0 20px 20px;">
+                    <p style="margin:0;font-size:14px;color:#718096;font-style:italic;">No major news for {{ hero.ticker }} today.</p>
+                  </td>
+                </tr>
+                {% endif %}
+              </table>
+            </td>
+          </tr>
+          {% endif %}
+
+          <!-- Compact grid: remaining tickers -->
+          {% if compact %}
+          <tr>
+            <td style="padding:8px 24px 4px;">
+              <p style="margin:0 0 8px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#64748b;">Other Movers</p>
+            </td>
+          </tr>
+          {% for row in compact|batch(2, fill_with=none) %}
+          <tr>
+            <td style="padding:0 16px 8px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  {% for section in row %}
+                  <td width="50%" valign="top" style="padding:6px;{% if not section %}border:none;{% endif %}">
+                    {% if section %}
+                    {% set sec_quote = section.quote %}
+                    {% set sec_positive = sec_quote and sec_quote.change_pct is not none and sec_quote.change_pct >= 0 %}
+                    {% set sec_negative = sec_quote and sec_quote.change_pct is not none and sec_quote.change_pct < 0 %}
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;border-radius:10px;border:1px solid #e8ecf0;height:100%;">
+                      <tr>
+                        <td style="padding:12px 14px 8px;">
+                          <span style="font-size:14px;font-weight:700;color:#0f172a;">{{ section.ticker }}</span>
+                          {% if sec_quote %}
+                          <span style="font-size:13px;font-weight:600;color:#334155;margin-left:6px;">${{ "%.2f"|format(sec_quote.price) }}</span>
+                          {% if sec_quote.change_pct is not none %}
+                          <span style="font-size:11px;font-weight:700;margin-left:4px;color:{% if sec_positive %}#16a34a{% elif sec_negative %}#dc2626{% else %}#64748b{% endif %};">
+                            {% if sec_quote.change_pct >= 0 %}+{% endif %}{{ "%.1f"|format(sec_quote.change_pct) }}%
+                          </span>
+                          {% endif %}
+                          {% endif %}
+                        </td>
+                      </tr>
+                      {% if section.error %}
+                      <tr>
+                        <td style="padding:0 14px 12px;">
+                          <p style="margin:0;font-size:12px;color:#94a3b8;font-style:italic;">News unavailable</p>
+                        </td>
+                      </tr>
+                      {% elif section.stories %}
+                      {% set story = section.stories[0] %}
+                      <tr>
+                        <td style="padding:0 14px 12px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              {% if story.image %}
+                              <td width="60" style="vertical-align:top;padding-right:8px;">
+                                <img src="{{ story.image }}" alt="" width="60" height="40" style="display:block;width:60px;height:40px;object-fit:cover;border-radius:4px;">
+                              </td>
+                              {% elif section.logo %}
+                              <td width="36" style="vertical-align:top;padding-right:8px;">
+                                <img src="{{ section.logo }}" alt="{{ section.ticker }}" width="36" height="36" style="display:block;width:36px;height:36px;object-fit:contain;">
+                              </td>
+                              {% endif %}
+                              <td style="vertical-align:top;">
+                                <a href="{{ story.url }}" style="font-size:12px;font-weight:600;color:#1d4ed8;text-decoration:none;line-height:1.4;">{{ story.headline }}</a>
+                                <p style="margin:4px 0 0;font-size:10px;color:#94a3b8;">{{ story.source }}{% if story.relative_time %} · {{ story.relative_time }}{% endif %}</p>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      {% else %}
+                      <tr>
+                        <td style="padding:0 14px 12px;">
+                          <p style="margin:0;font-size:12px;color:#94a3b8;font-style:italic;">No news today</p>
+                        </td>
+                      </tr>
+                      {% endif %}
+                    </table>
+                    {% endif %}
+                  </td>
+                  {% endfor %}
+                </tr>
+              </table>
+            </td>
+          </tr>
           {% endfor %}
+          {% endif %}
 
           <!-- Footer -->
           <tr>
-            <td style="padding:20px 32px;background-color:#f8fafc;border-top:1px solid #e8ecf0;text-align:center;">
-              <p style="margin:0;font-size:12px;color:#a0aec0;">{{ ticker_count }} tickers · {{ story_count }} stories · stock-news-bot</p>
+            <td style="padding:24px 28px;background-color:#f8fafc;border-top:1px solid #e8ecf0;text-align:center;">
+              <p style="margin:0;font-size:12px;color:#94a3b8;">{{ ticker_count }} tickers · {{ story_count }} stories · stock-news-bot</p>
             </td>
           </tr>
 

@@ -18,6 +18,16 @@ FETCH_LIMIT_PER_TICKER = 10
 SEND_DELAY_SECONDS = 2
 SUMMARY_EXCERPT_LENGTH = 160
 
+# Finnhub often returns publisher branding instead of article photos.
+PUBLISHER_LOGO_MARKERS = (
+    "yahoo_finance",
+    "/rz/stage/p/",
+    "yimg.com/rz/",
+    "seekingalpha.com/assets/images/sa_logo",
+    "benzinga.com/sites/all/themes/benzinga",
+    "foolcdn.com/media/affiliates/logos",
+)
+
 FINNHUB_KEY = os.environ.get("FINNHUB_API_KEY")
 WHATSAPP_PHONE = os.environ.get("WHATSAPP_PHONE")
 CALLMEBOT_KEY = os.environ.get("CALLMEBOT_API_KEY")
@@ -76,6 +86,29 @@ def fetch_quote(symbol: str, api_key: str) -> dict | None:
     if not data or data.get("c") in (None, 0):
         return None
     return {"price": data["c"], "change_pct": data.get("dp")}
+
+
+def fetch_company_logo(symbol: str, api_key: str) -> str | None:
+    response = requests.get(
+        "https://finnhub.io/api/v1/stock/profile2",
+        params={"symbol": symbol, "token": api_key},
+        timeout=30,
+    )
+    response.raise_for_status()
+    logo = response.json().get("logo", "").strip()
+    return logo or None
+
+
+def is_usable_article_image(url: str | None) -> bool:
+    if not url:
+        return False
+    lower = url.lower()
+    return not any(marker in lower for marker in PUBLISHER_LOGO_MARKERS)
+
+
+def sanitize_article_image(url: str | None) -> str | None:
+    cleaned = (url or "").strip()
+    return cleaned if is_usable_article_image(cleaned) else None
 
 
 def story_dedupe_key(item: dict) -> str:
@@ -149,7 +182,7 @@ def select_stories(
             {
                 "headline": item.get("headline", "No headline").strip(),
                 "summary": excerpt_summary(summary) if summary else "",
-                "image": item.get("image", "").strip() or None,
+                "image": sanitize_article_image(item.get("image")),
                 "url": item.get("url", "").strip(),
                 "source": item.get("source", "").strip() or "News",
                 "relative_time": format_relative_time(item.get("datetime")),
@@ -166,7 +199,14 @@ def collect_digest_data(tickers: list[str], api_key: str) -> tuple[list[dict], i
     total_stories = 0
 
     for ticker in tickers:
-        section: dict = {"ticker": ticker, "quote": None, "stories": [], "error": None}
+        section: dict = {
+            "ticker": ticker,
+            "quote": None,
+            "logo": None,
+            "hero_image": None,
+            "stories": [],
+            "error": None,
+        }
 
         try:
             section["quote"] = fetch_quote(ticker, api_key)
@@ -174,9 +214,15 @@ def collect_digest_data(tickers: list[str], api_key: str) -> tuple[list[dict], i
             print(f"Warning: failed to fetch quote for {ticker}: {exc}", file=sys.stderr)
 
         try:
+            section["logo"] = fetch_company_logo(ticker, api_key)
+        except requests.RequestException as exc:
+            print(f"Warning: failed to fetch logo for {ticker}: {exc}", file=sys.stderr)
+
+        try:
             news = fetch_news(ticker, api_key)
             stories = select_stories(news, seen_stories)
             section["stories"] = stories
+            section["hero_image"] = next((story["image"] for story in stories if story["image"]), None)
             total_stories += len(stories)
         except requests.RequestException as exc:
             print(f"Warning: failed to fetch news for {ticker}: {exc}", file=sys.stderr)
@@ -241,6 +287,83 @@ def build_messages(sections: list[dict], tickers: list[str], total_stories: int)
     return messages
 
 
+def abs_change_pct(section: dict) -> float:
+    quote = section.get("quote")
+    if not quote or quote.get("change_pct") is None:
+        return 0.0
+    return abs(quote["change_pct"])
+
+
+def format_mover_label(ticker: str, change_pct: float | None) -> str:
+    if change_pct is None:
+        return ticker
+    sign = "+" if change_pct >= 0 else ""
+    return f"{ticker} {sign}{change_pct:.2f}%"
+
+
+def prepare_email_layout(sections: list[dict]) -> dict:
+    has_quotes = any(
+        s.get("quote") and s["quote"].get("change_pct") is not None for s in sections
+    )
+
+    ranked = sorted(sections, key=abs_change_pct, reverse=True)
+
+    if len(sections) == 1:
+        hero = sections[0]
+        compact = []
+    elif has_quotes:
+        hero = ranked[0]
+        compact = ranked[1:]
+    else:
+        hero = None
+        compact = list(sections)
+
+    movers_bar: list[dict] = []
+    gainers = losers = flat = 0
+
+    for section in sections:
+        quote = section.get("quote")
+        change_pct = quote.get("change_pct") if quote else None
+        price = quote.get("price") if quote else None
+
+        if change_pct is None:
+            flat += 1
+            is_positive = None
+        elif change_pct > 0:
+            gainers += 1
+            is_positive = True
+        elif change_pct < 0:
+            losers += 1
+            is_positive = False
+        else:
+            flat += 1
+            is_positive = None
+
+        movers_bar.append(
+            {
+                "ticker": section["ticker"],
+                "price": price,
+                "change_pct": change_pct,
+                "is_positive": is_positive,
+            }
+        )
+
+    movers_bar.sort(key=lambda m: abs(m["change_pct"] or 0), reverse=True)
+
+    top_mover_label = None
+    if hero:
+        hero_change = hero.get("quote", {}).get("change_pct") if hero.get("quote") else None
+        top_mover_label = format_mover_label(hero["ticker"], hero_change)
+
+    return {
+        "hero": hero,
+        "compact": compact,
+        "movers_bar": movers_bar,
+        "market_summary": {"gainers": gainers, "losers": losers, "flat": flat},
+        "top_mover_label": top_mover_label,
+    }
+
+
 def build_email_digest(
     sections: list[dict], tickers: list[str], total_stories: int
 ) -> tuple[str, str]:
@@ -250,54 +373,76 @@ def build_email_digest(
         autoescape=select_autoescape(["html"]),
     )
     template = env.get_template("email_digest.html")
+    layout = prepare_email_layout(sections)
     html = template.render(
         date_label=today_label,
         ticker_count=len(tickers),
         story_count=total_stories,
-        sections=sections,
+        **layout,
     )
-    text = build_plain_text(sections, today_label, len(tickers), total_stories)
+    text = build_plain_text(layout, today_label, len(tickers), total_stories)
     return html, text
 
 
+def format_section_plain_text(section: dict, *, compact: bool = False) -> list[str]:
+    lines: list[str] = []
+    ticker_line = section["ticker"]
+    if section["quote"]:
+        quote = section["quote"]
+        ticker_line += f"  ${quote['price']:.2f}"
+        if quote["change_pct"] is not None:
+            sign = "+" if quote["change_pct"] >= 0 else ""
+            ticker_line += f"  {sign}{quote['change_pct']:.2f}%"
+    lines.append(ticker_line)
+    lines.append("-" * len(ticker_line))
+
+    if section["error"]:
+        lines.append(f"Could not fetch news for {section['ticker']}.")
+    elif not section["stories"]:
+        lines.append(f"No major news for {section['ticker']} today.")
+    elif compact:
+        story = section["stories"][0]
+        lines.append(f"• {story['headline']}")
+        if story["url"]:
+            lines.append(f"  {story['url']}")
+    else:
+        for index, story in enumerate(section["stories"], start=1):
+            lines.append(f"{index}. {story['headline']}")
+            if story["summary"]:
+                lines.append(f"   {story['summary']}")
+            meta = story["source"]
+            if story["relative_time"]:
+                meta = f"{meta} · {story['relative_time']}"
+            lines.append(f"   {meta}")
+            if story["url"]:
+                lines.append(f"   {story['url']}")
+            lines.append("")
+
+    lines.append("")
+    return lines
+
+
 def build_plain_text(
-    sections: list[dict], date_label: str, ticker_count: int, story_count: int
+    layout: dict, date_label: str, ticker_count: int, story_count: int
 ) -> str:
+    summary = layout["market_summary"]
     lines = [
         f"Stock News — {date_label}",
         f"{ticker_count} tickers · {story_count} stories",
+        f"{summary['gainers']} up · {summary['losers']} down · {summary['flat']} flat",
         "",
     ]
 
-    for section in sections:
-        ticker_line = section["ticker"]
-        if section["quote"]:
-            quote = section["quote"]
-            ticker_line += f"  ${quote['price']:.2f}"
-            if quote["change_pct"] is not None:
-                sign = "+" if quote["change_pct"] >= 0 else ""
-                ticker_line += f"  {sign}{quote['change_pct']:.2f}%"
-        lines.append(ticker_line)
-        lines.append("-" * len(ticker_line))
-
-        if section["error"]:
-            lines.append(f"Could not fetch news for {section['ticker']}.")
-        elif not section["stories"]:
-            lines.append(f"No major news for {section['ticker']} today.")
-        else:
-            for index, story in enumerate(section["stories"], start=1):
-                lines.append(f"{index}. {story['headline']}")
-                if story["summary"]:
-                    lines.append(f"   {story['summary']}")
-                meta = story["source"]
-                if story["relative_time"]:
-                    meta = f"{meta} · {story['relative_time']}"
-                lines.append(f"   {meta}")
-                if story["url"]:
-                    lines.append(f"   {story['url']}")
-                lines.append("")
-
+    if layout["top_mover_label"]:
+        lines.append(f"Top mover today: {layout['top_mover_label']}")
         lines.append("")
+
+    if layout["hero"]:
+        lines.append("=== TOP MOVER ===")
+        lines.extend(format_section_plain_text(layout["hero"], compact=False))
+
+    for section in layout["compact"]:
+        lines.extend(format_section_plain_text(section, compact=True))
 
     lines.append(f"{ticker_count} tickers · {story_count} stories · stock-news-bot")
     return "\n".join(lines)

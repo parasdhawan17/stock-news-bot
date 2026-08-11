@@ -8,8 +8,9 @@ import re
 import sys
 import time
 import urllib.parse
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone, time as time_of_day
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import requests
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -21,6 +22,13 @@ WEB_HEADLINES_PER_TICKER = FETCH_LIMIT_PER_TICKER = 10
 SEND_DELAY_SECONDS = 2
 SUMMARY_EXCERPT_LENGTH = 160
 MAX_TICKERS_PER_USER = 10
+MAX_SUBJECT_MOVERS = 3
+MAX_SUBJECT_HEADLINES = 3
+SUBJECT_MAX_LEN = 78
+HEADLINE_SNIPPET_LEN = 32
+ET_ZONE = ZoneInfo("America/New_York")
+MARKET_OPEN_ET = time_of_day(9, 30)
+MARKET_CLOSE_ET = time_of_day(16, 0)
 TICKER_PATTERN = re.compile(r"^[A-Z][A-Z0-9.]{0,9}$")
 
 # Finnhub often returns publisher branding instead of article photos.
@@ -567,22 +575,113 @@ def format_email_heading(layout: dict) -> str:
     return f"{ticker} held steady"
 
 
-def format_email_subject(layout: dict, date_label: str) -> str:
-    heading = format_email_heading(layout)
-    if heading == DIGEST_HEADING:
-        return f"Tickr Digest · {date_label}"
-    return f"{heading} · {date_label}"
+def digest_session(
+    now: datetime | None = None, override: str = "auto"
+) -> str:
+    """Return 'pre_open' or 'post_close' from ET clock or an explicit override."""
+    if override in ("pre_open", "post_close"):
+        return override
+
+    current = (now or datetime.now(ET_ZONE)).astimezone(ET_ZONE)
+    local_time = current.time()
+    if local_time < MARKET_OPEN_ET:
+        return "pre_open"
+    if local_time >= MARKET_CLOSE_ET:
+        return "post_close"
+    return "pre_open" if current.hour < 12 else "post_close"
+
+
+def truncate_subject_snippet(text: str, max_len: int = HEADLINE_SNIPPET_LEN) -> str:
+    text = " ".join(text.split())
+    if len(text) <= max_len:
+        return text
+    cut = text[: max_len - 1].rstrip(" ,;:-")
+    if " " in cut:
+        cut = cut.rsplit(" ", 1)[0].rstrip(" ,;:-")
+    return (cut or text[: max_len - 1].rstrip()) + "…"
+
+
+def mover_subject_chip(mover: dict) -> str | None:
+    change_pct = mover.get("change_pct")
+    if change_pct is None:
+        return None
+    if change_pct > 0:
+        emoji = "📈"
+    elif change_pct < 0:
+        emoji = "📉"
+    else:
+        emoji = "➡️"
+    return f"{emoji} {mover['ticker']} {change_pct:+.1f}%"
+
+
+def join_subject_chips(chips: list[str], *, prefix: str = "") -> str | None:
+    if not chips:
+        return None
+    while chips:
+        body = " · ".join(chips)
+        subject = f"{prefix}{body}" if prefix else body
+        if len(subject) <= SUBJECT_MAX_LEN:
+            return subject
+        chips = chips[:-1]
+    return None
+
+
+def format_pre_open_subject(layout: dict, date_label: str) -> str:
+    sections: list[dict] = []
+    hero = layout.get("hero")
+    if hero:
+        sections.append(hero)
+    sections.extend(layout.get("compact") or [])
+
+    chips: list[str] = []
+    for section in sections:
+        stories = section.get("stories") or []
+        if not stories:
+            continue
+        headline = (stories[0].get("headline") or "").strip()
+        if not headline:
+            continue
+        snippet = truncate_subject_snippet(headline)
+        chips.append(f"{section['ticker']} · {snippet}")
+        if len(chips) >= MAX_SUBJECT_HEADLINES:
+            break
+
+    subject = join_subject_chips(chips, prefix="💡 ")
+    return subject or f"📊 Tickr Digest · {date_label}"
+
+
+def format_post_close_subject(layout: dict, date_label: str) -> str:
+    chips: list[str] = []
+    for mover in layout.get("movers_bar") or []:
+        chip = mover_subject_chip(mover)
+        if not chip:
+            continue
+        chips.append(chip)
+        if len(chips) >= MAX_SUBJECT_MOVERS:
+            break
+
+    subject = join_subject_chips(chips)
+    return subject or f"📊 Tickr Digest · {date_label}"
+
+
+def format_email_subject(layout: dict, date_label: str, session: str) -> str:
+    if session == "pre_open":
+        return format_pre_open_subject(layout, date_label)
+    return format_post_close_subject(layout, date_label)
 
 
 def build_email_digest(
-    sections: list[dict], tickers: list[str], total_stories: int
+    sections: list[dict],
+    tickers: list[str],
+    total_stories: int,
+    session: str,
 ) -> tuple[str, str, str]:
     today_label = date.today().strftime("%d %b %Y")
     env = get_jinja_env()
     template = env.get_template("email_digest.html")
     layout = prepare_email_layout(sections)
     email_heading = format_email_heading(layout)
-    subject = format_email_subject(layout, today_label)
+    subject = format_email_subject(layout, today_label, session)
     html = template.render(
         date_label=today_label,
         ticker_count=len(tickers),
@@ -936,6 +1035,25 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Send via every configured delivery channel (email and WhatsApp).",
     )
+    parser.add_argument(
+        "--session",
+        choices=("auto", "pre_open", "post_close"),
+        default="auto",
+        help=(
+            "Email subject style: pre_open uses multi-headline teasers, "
+            "post_close uses multi-mover chips. Default auto uses America/New_York clock."
+        ),
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Build digests and print subjects without sending email or WhatsApp.",
+    )
+    parser.add_argument(
+        "--recipient",
+        metavar="EMAIL",
+        help="Only prepare/send email for this subscriber address (case-insensitive).",
+    )
     return parser.parse_args()
 
 
@@ -943,6 +1061,16 @@ def main() -> None:
     args = parse_args()
     send_email_digest = args.email or args.all
     send_whatsapp_digest = args.whatsapp or args.all
+    dry_run = args.dry_run
+    recipient_filter = (args.recipient or "").strip().lower() or None
+    email_session = digest_session(override=args.session)
+
+    if recipient_filter and not send_email_digest:
+        print(
+            "Error: --recipient requires --email (or --all).",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     finnhub_key = require_env("FINNHUB_API_KEY", FINNHUB_KEY)
 
@@ -951,29 +1079,63 @@ def main() -> None:
         subscribers = fetch_subscribers_with_tickers(int(BREVO_LIST_ID), BREVO_API_KEY)
         print(f"Fetched {len(subscribers)} subscriber(s) from Brevo list {BREVO_LIST_ID}")
 
-    digest_tickers = resolve_web_tickers(BREVO_API_KEY, subscribers)
+    if recipient_filter and subscribers:
+        matched = [
+            s
+            for s in subscribers
+            if s.get("email", "").strip().lower() == recipient_filter
+        ]
+        if not matched:
+            print(
+                f"No subscriber matched --recipient {args.recipient}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        subscribers = matched
+        print(f"Filtered to recipient: {subscribers[0]['email']}")
 
-    sections, _ = collect_digest_data(digest_tickers, finnhub_key)
-    write_web_pages(sections, digest_tickers)
+    if dry_run and recipient_filter:
+        # Narrow fetch to the recipient's tickers; skip publishing the public web digest.
+        user_tickers = subscribers[0].get("tickers") if subscribers else []
+        if not user_tickers:
+            print(
+                f"Skipped {args.recipient}: no valid tickers",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        digest_tickers = user_tickers
+        print(
+            f"Dry-run fetch limited to {len(digest_tickers)} ticker(s): "
+            f"{', '.join(digest_tickers)}"
+        )
+        sections, _ = collect_digest_data(digest_tickers, finnhub_key)
+        print("Web digest publish skipped (dry-run with --recipient).")
+    else:
+        digest_tickers = resolve_web_tickers(BREVO_API_KEY, subscribers)
+        sections, _ = collect_digest_data(digest_tickers, finnhub_key)
+        write_web_pages(sections, digest_tickers)
 
     if send_whatsapp_digest:
-        phone = require_env("WHATSAPP_PHONE", WHATSAPP_PHONE)
-        callmebot_key = require_env("CALLMEBOT_API_KEY", CALLMEBOT_KEY)
-        whatsapp_tickers = load_tickers()
-        if whatsapp_tickers == digest_tickers:
-            whatsapp_sections = sections
-            whatsapp_total_stories = count_email_stories(sections)
+        if dry_run:
+            print("WhatsApp dry-run: skipping send.")
         else:
-            whatsapp_sections, whatsapp_total_stories = collect_digest_data(
-                whatsapp_tickers, finnhub_key
+            phone = require_env("WHATSAPP_PHONE", WHATSAPP_PHONE)
+            callmebot_key = require_env("CALLMEBOT_API_KEY", CALLMEBOT_KEY)
+            whatsapp_tickers = load_tickers()
+            if whatsapp_tickers == digest_tickers:
+                whatsapp_sections = sections
+                whatsapp_total_stories = count_email_stories(sections)
+            else:
+                whatsapp_sections, whatsapp_total_stories = collect_digest_data(
+                    whatsapp_tickers, finnhub_key
+                )
+            messages = build_messages(whatsapp_sections, whatsapp_tickers, whatsapp_total_stories)
+            total_chars = sum(len(message) for message in messages)
+            print(
+                f"Prepared {len(messages)} WhatsApp messages for {len(whatsapp_tickers)} tickers "
+                f"({total_chars} chars total)"
             )
-        messages = build_messages(whatsapp_sections, whatsapp_tickers, whatsapp_total_stories)
-        total_chars = sum(len(message) for message in messages)
-        print(
-            f"Prepared {len(messages)} WhatsApp messages for {len(whatsapp_tickers)} tickers "
-            f"({total_chars} chars total)"
-        )
-        send_whatsapp_messages(messages, phone, callmebot_key)
+            send_whatsapp_messages(messages, phone, callmebot_key)
     else:
         print("WhatsApp skipped (pass --whatsapp to enable).")
 
@@ -985,12 +1147,27 @@ def main() -> None:
                 file=sys.stderr,
             )
             sys.exit(1)
+        print(f"Email subject session: {email_session}")
+        if dry_run:
+            print("Email dry-run: subjects will be printed, nothing will be sent.")
         try:
             if BREVO_LIST_ID:
                 if not subscribers and BREVO_API_KEY:
                     subscribers = fetch_subscribers_with_tickers(
                         int(BREVO_LIST_ID), BREVO_API_KEY
                     )
+                    if recipient_filter:
+                        subscribers = [
+                            s
+                            for s in subscribers
+                            if s.get("email", "").strip().lower() == recipient_filter
+                        ]
+                        if not subscribers:
+                            print(
+                                f"No subscriber matched --recipient {args.recipient}",
+                                file=sys.stderr,
+                            )
+                            sys.exit(1)
                 if not subscribers:
                     print("No email recipients found; skipping email send.")
                 else:
@@ -1004,12 +1181,17 @@ def main() -> None:
                         user_sections = filter_sections(sections, user_tickers)
                         user_story_count = count_email_stories(user_sections)
                         html, text, subject = build_email_digest(
-                            user_sections, user_tickers, user_story_count
+                            user_sections, user_tickers, user_story_count, email_session
                         )
                         print(
                             f"Prepared email for {email} "
                             f"({len(user_tickers)} tickers, subject: {subject})"
                         )
+                        if dry_run:
+                            print(f"Dry-run subject [{email_session}]: {subject}")
+                            print(f"Dry-run HTML size: {len(html)} chars")
+                            sent_count += 1
+                            continue
                         send_email(
                             html,
                             text,
@@ -1021,8 +1203,17 @@ def main() -> None:
                         )
                         sent_count += 1
                     if sent_count:
-                        print(f"Sent {sent_count} personalized email(s)")
+                        if dry_run:
+                            print(f"Dry-run prepared {sent_count} personalized email(s)")
+                        else:
+                            print(f"Sent {sent_count} personalized email(s)")
             elif EMAIL_TO:
+                if recipient_filter and EMAIL_TO.strip().lower() != recipient_filter:
+                    print(
+                        f"No subscriber matched --recipient {args.recipient}",
+                        file=sys.stderr,
+                    )
+                    sys.exit(1)
                 fallback_tickers = load_tickers()
                 email_sections = (
                     filter_sections(sections, fallback_tickers)
@@ -1031,15 +1222,24 @@ def main() -> None:
                 )
                 email_story_count = count_email_stories(email_sections)
                 html, text, subject = build_email_digest(
-                    email_sections, fallback_tickers, email_story_count
+                    email_sections, fallback_tickers, email_story_count, email_session
                 )
                 print(
                     f"Prepared email for {EMAIL_TO} "
                     f"(subject: {subject}, {len(html)} chars HTML)"
                 )
-                send_email(
-                    html, text, BREVO_API_KEY, EMAIL_FROM, [EMAIL_TO], EMAIL_FROM_NAME, subject
-                )
+                if dry_run:
+                    print(f"Dry-run subject [{email_session}]: {subject}")
+                else:
+                    send_email(
+                        html,
+                        text,
+                        BREVO_API_KEY,
+                        EMAIL_FROM,
+                        [EMAIL_TO],
+                        EMAIL_FROM_NAME,
+                        subject,
+                    )
             else:
                 print("No email recipients found; skipping email send.")
         except requests.RequestException as exc:

@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Tell clients we handle both schemes so they don't auto-invert colors -->
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <title>{{ email_heading }} · Tickr Digest</title>
@@ -11,6 +10,16 @@
     :root {
       color-scheme: light dark;
       supported-color-schemes: light dark;
+    }
+
+    /* Gmail-only: keep light header text from being inverted to dark */
+    u + .body .gmail-blend {
+      background: #000000;
+      mix-blend-mode: screen;
+    }
+    u + .body .gmail-blend-inner {
+      background: #000000;
+      mix-blend-mode: difference;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -86,7 +95,7 @@
   </style>
   <![endif]-->
 </head>
-<body class="email-body" style="margin:0;padding:0;background-color:#eef1f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1a1a2e;">
+<body class="body email-body" style="margin:0;padding:0;background-color:#eef1f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1a1a2e;">
   <table role="presentation" class="email-outer" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eef1f5" style="background-color:#eef1f5;padding:24px 12px;">
     <tr>
       <td align="center">
@@ -98,13 +107,17 @@
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td align="center" style="padding:28px 28px 18px;text-align:center;">
-                    <p style="margin:0 0 8px;font-size:11px;color:#f1f5f9;letter-spacing:2px;text-transform:uppercase;font-weight:600;">Tickr Digest</p>
-                    <h1 style="margin:0 0 10px;font-size:26px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;line-height:1.25;">{{ email_heading }}</h1>
-                    <p style="margin:0 0 6px;font-size:14px;color:#e2e8f0;line-height:1.45;">{{ date_label }} · {{ ticker_count }} tickers · {{ story_count }} stories</p>
-                    <p style="margin:0;font-size:13px;color:#cbd5e1;">{{ market_summary.gainers }} up · {{ market_summary.losers }} down · {{ market_summary.flat }} flat</p>
-                    {% if top_mover_label %}
-                    <p style="margin:14px 0 0;font-size:13px;color:#f8fafc;background-color:rgba(15,23,42,0.45);border:1px solid rgba(255,255,255,0.2);display:inline-block;padding:6px 14px;border-radius:20px;">Today's biggest move: <strong>{{ top_mover_label }}</strong></p>
-                    {% endif %}
+                    <div class="gmail-blend" style="display:inline-block;">
+                      <div class="gmail-blend-inner" style="display:inline-block;">
+                        <p style="margin:0 0 8px;font-size:11px;color:#f1f5f9;letter-spacing:2px;text-transform:uppercase;font-weight:600;">Tickr Digest</p>
+                        <h1 style="margin:0 0 10px;font-size:26px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;line-height:1.25;">{{ email_heading }}</h1>
+                        <p style="margin:0 0 6px;font-size:14px;color:#e2e8f0;line-height:1.45;">{{ date_label }} · {{ ticker_count }} tickers · {{ story_count }} stories</p>
+                        <p style="margin:0;font-size:13px;color:#cbd5e1;">{{ market_summary.gainers }} up · {{ market_summary.losers }} down · {{ market_summary.flat }} flat</p>
+                        {% if top_mover_label %}
+                        <p style="margin:14px 0 0;font-size:13px;color:#f8fafc;background-color:rgba(15,23,42,0.45);border:1px solid rgba(255,255,255,0.2);display:inline-block;padding:6px 14px;border-radius:20px;">Today's biggest move: <strong>{{ top_mover_label }}</strong></p>
+                        {% endif %}
+                      </div>
+                    </div>
                   </td>
                 </tr>
                 <tr>

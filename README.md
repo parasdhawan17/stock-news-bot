@@ -92,6 +92,7 @@ Subscribers can re-submit the same form with the same email to update their tick
 stock-news-bot/
 ├── .github/workflows/daily-stock-news.yml
 ├── config/tickers.json              # Fallback watchlist (WhatsApp, no Brevo catalog)
+├── config/ticker_aliases.json       # Company/product aliases for news relevance scoring
 ├── docs/                            # Generated web digest (GitHub Pages)
 │   ├── index.html
 │   └── archive/

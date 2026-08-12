@@ -26,6 +26,12 @@ MAX_SUBJECT_MOVERS = 3
 MAX_SUBJECT_HEADLINES = 3
 SUBJECT_MAX_LEN = 78
 HEADLINE_SNIPPET_LEN = 32
+MIN_RELEVANCE_SCORE = 3
+MIN_STORIES_PER_TICKER = 2
+HEADLINE_ALIAS_POINTS = 3
+SUMMARY_ALIAS_POINTS = 1
+TICKER_SYMBOL_BONUS = 1
+RIVAL_PENALTY = 3
 ET_ZONE = ZoneInfo("America/New_York")
 MARKET_OPEN_ET = time_of_day(9, 30)
 MARKET_CLOSE_ET = time_of_day(16, 0)
@@ -55,9 +61,13 @@ SITE_URL = os.environ.get("SITE_URL", "").rstrip("/")
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TICKERS_PATH = REPO_ROOT / "config" / "tickers.json"
+TICKER_ALIASES_PATH = REPO_ROOT / "config" / "ticker_aliases.json"
 TEMPLATES_PATH = REPO_ROOT / "templates"
 DOCS_PATH = REPO_ROOT / "docs"
 ARCHIVE_PATH = DOCS_PATH / "archive"
+
+_TICKER_ALIASES_CACHE: dict[str, list[str]] | None = None
+_ALIAS_PATTERN_CACHE: dict[str, re.Pattern[str]] = {}
 
 
 def require_env(name: str, value: str | None) -> str:
@@ -74,6 +84,104 @@ def load_tickers() -> list[str]:
         print("Error: no tickers configured in config/tickers.json", file=sys.stderr)
         sys.exit(1)
     return tickers
+
+
+def load_ticker_aliases() -> dict[str, list[str]]:
+    """Load alias map from config; keys are uppercased ticker symbols."""
+    global _TICKER_ALIASES_CACHE
+    if _TICKER_ALIASES_CACHE is not None:
+        return _TICKER_ALIASES_CACHE
+
+    if not TICKER_ALIASES_PATH.is_file():
+        _TICKER_ALIASES_CACHE = {}
+        return _TICKER_ALIASES_CACHE
+
+    data = json.loads(TICKER_ALIASES_PATH.read_text(encoding="utf-8"))
+    raw = data.get("aliases", data)
+    aliases: dict[str, list[str]] = {}
+    for ticker, values in raw.items():
+        key = str(ticker).strip().upper()
+        if not key:
+            continue
+        seen: set[str] = set()
+        cleaned: list[str] = []
+        for value in values or []:
+            alias = str(value).strip()
+            if not alias:
+                continue
+            lowered = alias.lower()
+            if lowered in seen:
+                continue
+            seen.add(lowered)
+            cleaned.append(alias)
+        if cleaned:
+            aliases[key] = cleaned
+    _TICKER_ALIASES_CACHE = aliases
+    return _TICKER_ALIASES_CACHE
+
+
+def aliases_for(ticker: str) -> list[str]:
+    ticker = ticker.strip().upper()
+    aliases = load_ticker_aliases().get(ticker, [])
+    if ticker and ticker.lower() not in {a.lower() for a in aliases}:
+        return [ticker, *aliases]
+    return aliases or ([ticker] if ticker else [])
+
+
+def _alias_pattern(alias: str) -> re.Pattern[str]:
+    cached = _ALIAS_PATTERN_CACHE.get(alias)
+    if cached is not None:
+        return cached
+    escaped = re.escape(alias)
+    # Allow optional leading $ for tickers ($NVDA) and treat & / . inside aliases safely.
+    pattern = re.compile(rf"(?<![A-Za-z0-9])\$?{escaped}(?![A-Za-z0-9])", re.IGNORECASE)
+    _ALIAS_PATTERN_CACHE[alias] = pattern
+    return pattern
+
+
+def whole_word_match(alias: str, text: str) -> bool:
+    if not alias or not text:
+        return False
+    return _alias_pattern(alias).search(text) is not None
+
+
+def relevance_score(
+    item: dict,
+    ticker: str,
+    watched_tickers: list[str] | set[str] | None = None,
+) -> int:
+    """Score how strongly a Finnhub news item relates to ticker."""
+    headline = (item.get("headline") or "").strip()
+    summary = (item.get("summary") or "").strip()
+    if not headline and not summary:
+        return 0
+
+    score = 0
+    headline_hits = 0
+    summary_hits = 0
+    for alias in aliases_for(ticker):
+        if whole_word_match(alias, headline):
+            headline_hits += 1
+        elif whole_word_match(alias, summary):
+            summary_hits += 1
+
+    score += min(headline_hits, 2) * HEADLINE_ALIAS_POINTS
+    score += min(summary_hits, 2) * SUMMARY_ALIAS_POINTS
+
+    # Extra nudge when the bare ticker symbol appears in the headline.
+    if whole_word_match(ticker, headline):
+        score += TICKER_SYMBOL_BONUS
+
+    own_hit = score > 0
+    watched = {t.strip().upper() for t in (watched_tickers or []) if t}
+    watched.discard(ticker.strip().upper())
+    if not own_hit and watched:
+        for other in watched:
+            if any(whole_word_match(alias, headline) for alias in aliases_for(other)):
+                score -= RIVAL_PENALTY
+                break
+
+    return score
 
 
 def parse_tickers(raw: str | list | tuple | None) -> list[str]:
@@ -291,46 +399,124 @@ def truncate_message(message: str) -> str:
     return message[: MAX_MESSAGE_LENGTH - 3].rstrip() + "..."
 
 
+def _build_story_dict(
+    item: dict,
+    score: int,
+    *,
+    excerpt: bool,
+    relevance_fallback: bool,
+) -> dict:
+    summary = item.get("summary", "").strip()
+    return {
+        "headline": item.get("headline", "No headline").strip(),
+        "summary": excerpt_summary(summary) if excerpt and summary else summary,
+        "image": sanitize_article_image(item.get("image")),
+        "url": item.get("url", "").strip(),
+        "source": item.get("source", "").strip() or "News",
+        "relative_time": format_relative_time(item.get("datetime")),
+        "published_at": format_full_datetime(item.get("datetime")),
+        "relevance_score": score,
+        "relevance_fallback": relevance_fallback,
+    }
+
+
 def select_stories(
     news: list[dict],
     seen_stories: set[str],
     limit: int = HEADLINES_PER_TICKER,
     *,
     excerpt: bool = True,
+    ticker: str | None = None,
+    watched_tickers: list[str] | set[str] | None = None,
+    min_score: int = MIN_RELEVANCE_SCORE,
+    min_stories: int = MIN_STORIES_PER_TICKER,
+    allow_fallback: bool = True,
 ) -> list[dict]:
-    stories: list[dict] = []
-    for item in news:
+    ranked: list[tuple[int, int, dict]] = []
+    for index, item in enumerate(news):
         key = story_dedupe_key(item)
         if not key or key in seen_stories:
             continue
 
-        seen_stories.add(key)
-        summary = item.get("summary", "").strip()
-        stories.append(
-            {
-                "headline": item.get("headline", "No headline").strip(),
-                "summary": excerpt_summary(summary) if excerpt and summary else summary,
-                "image": sanitize_article_image(item.get("image")),
-                "url": item.get("url", "").strip(),
-                "source": item.get("source", "").strip() or "News",
-                "relative_time": format_relative_time(item.get("datetime")),
-                "published_at": format_full_datetime(item.get("datetime")),
-            }
+        score = 0
+        if ticker:
+            score = relevance_score(item, ticker, watched_tickers)
+        ranked.append((score, index, item))
+
+    # Higher relevance first; preserve Finnhub order on ties.
+    ranked.sort(key=lambda row: (-row[0], row[1]))
+
+    stories: list[dict] = []
+    selected_keys: set[str] = set()
+
+    def take_from(
+        pool: list[tuple[int, int, dict]],
+        target_count: int,
+        *,
+        fallback: bool,
+    ) -> None:
+        for score, _index, item in pool:
+            if len(stories) >= target_count:
+                return
+            key = story_dedupe_key(item)
+            if not key or key in seen_stories or key in selected_keys:
+                continue
+            selected_keys.add(key)
+            seen_stories.add(key)
+            stories.append(
+                _build_story_dict(
+                    item,
+                    score,
+                    excerpt=excerpt,
+                    relevance_fallback=fallback,
+                )
+            )
+
+    strong = [(score, index, item) for score, index, item in ranked if score >= min_score]
+    take_from(strong, limit, fallback=False)
+
+    used_fallback = False
+    if allow_fallback and len(stories) < min_stories:
+        # Pad with any score (including negative) so each ticker still gets
+        # a minimum number of headlines when strong matches are scarce.
+        before = len(stories)
+        take_from(ranked, min_stories, fallback=True)
+        used_fallback = len(stories) > before
+
+    if used_fallback and stories and ticker and excerpt:
+        print(
+            f"Relevance fill: {ticker} padded to {len(stories)} story(ies) "
+            f"(lowest score={min(s['relevance_score'] for s in stories)})"
         )
-        if len(stories) >= limit:
-            break
+
     return stories
 
 
-def select_web_stories(news: list[dict], limit: int = WEB_HEADLINES_PER_TICKER) -> list[dict]:
-    return select_stories(news, set(), limit=limit, excerpt=False)
+def select_web_stories(
+    news: list[dict],
+    limit: int = WEB_HEADLINES_PER_TICKER,
+    *,
+    ticker: str | None = None,
+    watched_tickers: list[str] | set[str] | None = None,
+) -> list[dict]:
+    return select_stories(
+        news,
+        set(),
+        limit=limit,
+        excerpt=False,
+        ticker=ticker,
+        watched_tickers=watched_tickers,
+    )
 
 
 def collect_digest_data(tickers: list[str], api_key: str) -> tuple[list[dict], int]:
     seen_stories: set[str] = set()
     sections: list[dict] = []
     total_stories = 0
+    watched = list(tickers)
 
+    # First pass: fetch quotes/logos/news for every ticker.
+    raw_news: dict[str, list[dict]] = {}
     for ticker in tickers:
         section: dict = {
             "ticker": ticker,
@@ -353,17 +539,73 @@ def collect_digest_data(tickers: list[str], api_key: str) -> tuple[list[dict], i
             print(f"Warning: failed to fetch logo for {ticker}: {exc}", file=sys.stderr)
 
         try:
-            news = fetch_news(ticker, api_key)
-            stories = select_stories(news, seen_stories)
-            section["stories"] = stories
-            section["web_stories"] = select_web_stories(news)
-            section["hero_image"] = next((story["image"] for story in stories if story["image"]), None)
-            total_stories += len(stories)
+            raw_news[ticker] = fetch_news(ticker, api_key)
         except requests.RequestException as exc:
             print(f"Warning: failed to fetch news for {ticker}: {exc}", file=sys.stderr)
             section["error"] = str(exc)
+            raw_news[ticker] = []
 
         sections.append(section)
+
+    # Assign each article to the highest-scoring watched ticker that received it.
+    best_owner: dict[str, tuple[str, int]] = {}
+    for ticker, news in raw_news.items():
+        for item in news:
+            key = story_dedupe_key(item)
+            if not key:
+                continue
+            score = relevance_score(item, ticker, watched)
+            previous = best_owner.get(key)
+            if previous is None or score > previous[1]:
+                best_owner[key] = (ticker, score)
+
+    for section in sections:
+        ticker = section["ticker"]
+        news = raw_news.get(ticker, [])
+        # Keep articles this ticker owns, or that another ticker only weakly claimed.
+        # Strong claims (score >= MIN_RELEVANCE_SCORE) still transfer away.
+        owned_news = []
+        for item in news:
+            key = story_dedupe_key(item)
+            owner = best_owner.get(key)
+            if (
+                owner
+                and owner[0] != ticker
+                and owner[1] >= MIN_RELEVANCE_SCORE
+            ):
+                continue
+            owned_news.append(item)
+
+        if section["error"] and not owned_news:
+            continue
+
+        stories = select_stories(
+            owned_news,
+            seen_stories,
+            ticker=ticker,
+            watched_tickers=watched,
+        )
+        section["stories"] = stories
+        section["web_stories"] = select_web_stories(
+            owned_news,
+            ticker=ticker,
+            watched_tickers=watched,
+        )
+        section["hero_image"] = next((story["image"] for story in stories if story["image"]), None)
+        total_stories += len(stories)
+        if news and not stories:
+            print(
+                f"Relevance: no usable stories for {ticker} "
+                f"(fetched {len(news)}, owned {len(owned_news)})"
+            )
+        else:
+            strong_count = sum(
+                1 for story in section["web_stories"] if not story.get("relevance_fallback")
+            )
+            print(
+                f"Relevance: {ticker} kept {len(section['web_stories'])}/{len(news)} "
+                f"story(ies) ({strong_count} strong, owned {len(owned_news)})"
+            )
 
     return sections, total_stories
 

@@ -1,13 +1,10 @@
+# Email cron moved to daily-digest repo (Railway cron service).
+# This workflow is kept for emergency manual runs only.
+
 name: Daily Stock News
 
 on:
-  schedule:
-    - cron: '15 13 * * *'  # 9:15 AM ET — 15 min before US market open (13:15 UTC during EDT)
-    - cron: '15 20 * * *'  # 4:15 PM ET — 15 min after US market close (20:15 UTC during EDT)
   workflow_dispatch:
-
-permissions:
-  contents: write
 
 jobs:
   send-news:
@@ -35,11 +32,3 @@ jobs:
           EMAIL_FROM_NAME: ${{ secrets.EMAIL_FROM_NAME }}
           SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
         run: python scripts/send_stock_news.py --email
-
-      - name: Publish web digest
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/
-          git diff --staged --quiet || git commit -m "Update web digest"
-          git push

@@ -1,5 +1,7 @@
 # Stock News Bot
 
+> **Email cron:** Production twice-daily digests now run from the [daily-digest](https://github.com/parasdhawan17/daily-digest) repo on Railway cron (`scripts/send_digests.py`). This repo's GitHub Actions schedule is disabled; `workflow_dispatch` remains for emergencies.
+
 A zero-cost daily US stock news digest. Fetches headlines and quotes from Finnhub, publishes a live web digest on GitHub Pages, and optionally delivers via email or WhatsApp.
 
 **Cost: $0** — Finnhub free API, Brevo free email tier, GitHub Pages, GitHub Actions on a public repo. WhatsApp via CallMeBot is also free if enabled.
@@ -231,7 +233,11 @@ Set `SITE_URL` in `.env` to include the web digest link in email and WhatsApp fo
 
 ## Schedule
 
-The workflow runs at:
+Production email digests run on **Railway cron** in the [daily-digest](https://github.com/parasdhawan17/daily-digest) repo (`cronSchedule = "15 13,20 * * *"` UTC).
+
+This repo's `daily-stock-news.yml` workflow is **manual only** (`workflow_dispatch`) for emergencies.
+
+Historical schedule (when GitHub Actions was active):
 
 | Cron (UTC) | Time (ET) | When |
 |------------|-----------|------|
